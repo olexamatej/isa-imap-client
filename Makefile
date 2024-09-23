@@ -5,7 +5,7 @@ LDFLAGS=-pthread
 CFLAGS := -std=c++2a -g
 
 # Source files
-SRCS := main.cpp tcp_client.cpp runner.cpp commands.cpp 
+SRCS := main.cpp tcp_client.cpp runner.cpp commands.cpp connection.cpp arg_parser.cpp
 
 # Object files
 OBJS := $(SRCS:.cpp=.o)

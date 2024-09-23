@@ -11,7 +11,6 @@ Runner::Runner(std::string user_name, std::string user_password, std::string ser
     client.send(commands.login(tag, user_name, user_password));
     
     std::cout << client.receive() << std::endl;
-    tag;
 
     client.send(commands.list(tag, "\"\"", "*"));
 
