@@ -9,10 +9,10 @@
 #include <unistd.h>
 #include <string>
 
-class TCPClient {
+class Client {
     public:
-        TCPClient(std::string ip_address, std::string port);
-        ~TCPClient();
+        Client(std::string ip_address, std::string port, bool encryption);
+        ~Client();
         void send(std::string message);
         void connect();
         std::string receive();
@@ -21,6 +21,8 @@ class TCPClient {
         int _socket;
         std::string ip_address;
         std::string port;
+        bool encryption;
+
 };
 
 

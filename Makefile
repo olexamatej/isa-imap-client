@@ -1,11 +1,11 @@
 # Compiler
 CC := g++
-LDFLAGS=-pthread
+LDFLAGS= -pthread -lssl -lcrypto
 # Compiler flags
-CFLAGS := -std=c++2a -g
+CFLAGS := -std=c++2a -g 
 
 # Source files
-SRCS := main.cpp tcp_client.cpp runner.cpp commands.cpp connection.cpp arg_parser.cpp
+SRCS := main.cpp client.cpp runner.cpp commands.cpp connection.cpp arg_parser.cpp
 
 # Object files
 OBJS := $(SRCS:.cpp=.o)
@@ -32,5 +32,5 @@ clean:
 
 run:
 	make
-	./imapcl 
+	./imapcl google.com -a bb -o aa 
 	

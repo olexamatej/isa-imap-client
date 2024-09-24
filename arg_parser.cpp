@@ -22,7 +22,7 @@ Connection parse_arg(int argc, char *argv[])
             break;
     
         case 'T':
-            conn.ssl = true;
+            conn.encryption= true;
             break;
         case 'c':
             conn.cert_file = optarg;

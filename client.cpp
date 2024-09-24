@@ -1,19 +1,21 @@
-#include "tcp_client.h"
+#include "client.h"
+#include <openssl/ssl.h>
 
 
 //creating connection
-TCPClient::TCPClient(std::string ip_address, std::string port) {
+Client::Client(std::string ip_address, std::string port, bool encryption) {
     this->ip_address = ip_address;
     this->port = port;
+    this->encryption = encryption;
     connect();
 }
 
-TCPClient::~TCPClient() {
+Client::~Client() {
     close(_socket);
 }
 
 
-void TCPClient::connect() {
+void Client::connect() {
     int status;
     struct addrinfo hints;
     struct addrinfo *servinfo;
@@ -35,7 +37,7 @@ void TCPClient::connect() {
     }
 
     //creating connection
-        if (::connect(_socket, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+    if (::connect(_socket, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
         if (errno != EINPROGRESS) {
             perror("connect");
             close(_socket);
@@ -45,8 +47,9 @@ void TCPClient::connect() {
 
     freeaddrinfo(servinfo);
 }
+
 //send message
-void TCPClient::send(std::string message) {
+void Client::send(std::string message) {
     ssize_t bytes_sent = ::send(_socket, message.c_str(), message.size(), 0);
     if (bytes_sent == -1) {
         perror("send");
@@ -54,7 +57,7 @@ void TCPClient::send(std::string message) {
 }
 
 //receive message
-std::string TCPClient::receive(){
+std::string Client::receive(){
     char buffer[2000];
     ssize_t bytes_received = recv(_socket, buffer, sizeof(buffer), 0);
         if (bytes_received == -1) {
@@ -73,8 +76,8 @@ std::string TCPClient::receive(){
 //     std::string ip_address = "127.0.0.1";
 //     std::string port = "5553";
     
-//     // TCPClient client(ip_address, port);
-//     TCPClient client(ip_address, port);
+//     // Client client(ip_address, port);
+//     Client client(ip_address, port);
 //     client.send("Mam rad vlaky\n");
 
 //     std::cout << "conntected \n";
