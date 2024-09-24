@@ -8,6 +8,9 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 
 class Client {
     public:
@@ -17,11 +20,16 @@ class Client {
         void connect();
         std::string receive();
         void receiveTimeout(int){};
+        void init_openssl();
+        bool verify_certificate();
     private:
         int _socket;
         std::string ip_address;
         std::string port;
         bool encryption;
+
+        SSL_CTX* ctx;
+        SSL* ssl;
 
 };
 

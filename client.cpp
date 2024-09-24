@@ -1,46 +1,104 @@
 #include "client.h"
 #include <openssl/ssl.h>
 
-
-//creating connection
-Client::Client(std::string ip_address, std::string port, bool encryption) {
+// creating connection
+Client::Client(std::string ip_address, std::string port, bool encryption)
+{
     this->ip_address = ip_address;
     this->port = port;
     this->encryption = encryption;
+
+    if (encryption)
+    {
+        init_openssl();
+    }
     connect();
 }
 
-Client::~Client() {
+Client::~Client()
+{
     close(_socket);
+    if (encryption)
+    {
+        SSL_free(ssl);
+        SSL_CTX_free(ctx);
+    }
+    EVP_cleanup();
 }
 
+void Client::init_openssl()
+{
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    SSL_load_error_strings();
+    ctx = SSL_CTX_new(TLS_client_method());
+}
 
-void Client::connect() {
+bool Client::verify_certificate(){
+    X509 *cert;
+    cert = SSL_get_peer_certificate(ssl);
+    if (cert == nullptr)
+    {
+        std::cerr << "Error: No certificate provided by the server" << std::endl;
+        return false;
+    }
+
+    // Verify the certificate
+    if (SSL_get_verify_result(ssl) != X509_V_OK)
+    {
+        std::cerr << "Error: Certificate verification failed" << std::endl;
+        X509_free(cert);
+        return false;
+    }
+    X509_free(cert);
+    return true;
+
+}
+
+void Client::connect()
+{
     int status;
     struct addrinfo hints;
     struct addrinfo *servinfo;
     std::memset(&hints, 0, sizeof hints);
-    
+
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = 0;
-    //get ip from domain
-    if ((status = getaddrinfo(ip_address.c_str(), port.c_str(), &hints, &servinfo)) != 0) {
+    // get ip from domain
+    if ((status = getaddrinfo(ip_address.c_str(), port.c_str(), &hints, &servinfo)) != 0)
+    {
         fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
         exit(1);
     }
 
     _socket = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-    if (_socket == -1) {
+    if (_socket == -1)
+    {
         perror("socket");
         exit(1);
     }
 
-    //creating connection
-    if (::connect(_socket, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-        if (errno != EINPROGRESS) {
+    // creating connection
+    if (::connect(_socket, servinfo->ai_addr, servinfo->ai_addrlen) == -1)
+    {
+        if (errno != EINPROGRESS)
+        {
             perror("connect");
             close(_socket);
+            exit(1);
+        }
+    }
+
+    // encryption
+
+    if (encryption == true)
+    {
+        ssl = SSL_new(ctx);
+        SSL_set_fd(ssl, _socket);
+        if (SSL_connect(ssl) == -1)
+        {
+            ERR_print_errors_fp(stderr);
             exit(1);
         }
     }
@@ -48,46 +106,46 @@ void Client::connect() {
     freeaddrinfo(servinfo);
 }
 
-//send message
-void Client::send(std::string message) {
-    ssize_t bytes_sent = ::send(_socket, message.c_str(), message.size(), 0);
-    if (bytes_sent == -1) {
-        perror("send");
+// send message
+void Client::send(std::string message)
+{
+    if (encryption == true)
+    {
+        SSL_write(ssl, message.c_str(), message.size());
+    }
+    else
+    {
+        ssize_t bytes_sent = ::send(_socket, message.c_str(), message.size(), 0);
+        if (bytes_sent == -1)
+        {
+            perror("send");
+        }
     }
 }
 
-//receive message
-std::string Client::receive(){
+// receive message
+std::string Client::receive()
+{
     char buffer[2000];
-    ssize_t bytes_received = recv(_socket, buffer, sizeof(buffer), 0);
-        if (bytes_received == -1) {
-            if (errno != EAGAIN && errno != EWOULDBLOCK) {
-                perror("recv");
-            }
+    ssize_t bytes_received;
+    if (encryption == true)
+    {
+        bytes_received = SSL_read(ssl, buffer, sizeof(buffer));
+    }
+    else
+    {
+        bytes_received = recv(_socket, buffer, sizeof(buffer), 0);
+    }
+
+    if (bytes_received == -1)
+    {
+        if (errno != EAGAIN && errno != EWOULDBLOCK)
+        {
+            perror("recv");
+        }
         // Return empty string to indicate no data available
         return "";
     }
     // std::cout << "Received " << bytes_received << " bytes from " << ip_address << ":" << port << std::endl;
     return std::string(buffer, bytes_received);
 }
-
-
-// int main() {
-//     std::string ip_address = "127.0.0.1";
-//     std::string port = "5553";
-    
-//     // Client client(ip_address, port);
-//     Client client(ip_address, port);
-//     client.send("Mam rad vlaky\n");
-
-//     std::cout << "conntected \n";
-//    while(1) {
-//         std::string message = client.receive();
-//         if (message.empty()) {
-//             break;
-//         }
-//         std::cout << message << std::endl;
-//     }
-
-//     return 0;
-// }

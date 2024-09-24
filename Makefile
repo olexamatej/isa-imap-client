@@ -1,8 +1,9 @@
 # Compiler
 CC := g++
-LDFLAGS= -pthread -lssl -lcrypto
 # Compiler flags
 CFLAGS := -std=c++2a -g 
+
+LDFLAGS= -pthread -lssl -lcrypto
 
 # Source files
 SRCS := main.cpp client.cpp runner.cpp commands.cpp connection.cpp arg_parser.cpp
@@ -24,7 +25,7 @@ all: $(TARGET)
 
 # Rule to link object files and create the executable
 $(TARGET): $(OBJS)
-	$(CC) $(LDFLAGS) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
 # Clean rule
 clean:
