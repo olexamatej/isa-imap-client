@@ -33,5 +33,5 @@ clean:
 
 run:
 	make
-	./imapcl google.com -a bb -o aa 
+	./imapcl imap.centrum.sk -p 993 -T -a oo -o aa 
 	

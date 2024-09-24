@@ -3,15 +3,13 @@
 
 #include "client.h"
 #include "commands.h"
+#include "connection.h"
 
 
 class Runner {
     public:
-        Runner(std::string user_name, std::string user_password, std::string server);
+        Runner(Connection conn);
     private:
-        std::string user_name;
-        std::string user_password;
-        std::string server;
         uint8_t tag = 1;
 
 };

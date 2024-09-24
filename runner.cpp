@@ -1,11 +1,12 @@
 #include "runner.h"
 
-Runner::Runner(std::string user_name, std::string user_password, std::string server) {
-    Client client(server, "143", false);
+Runner::Runner(Connection conn) {
+    Client client(conn.server, conn.port, conn.encryption);
+
 
     std::cout << client.receive() << std::endl;
     Commands commands = Commands();
-    client.send(commands.login(tag, user_name, user_password));
+    client.send(commands.login(tag, conn.user_name, conn.user_password));
     std::cout << client.receive() << std::endl;
 
     client.send(commands.list(tag, "\"\"", "*"));

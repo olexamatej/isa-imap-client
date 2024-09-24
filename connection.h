@@ -20,15 +20,18 @@ class Connection{
             std::cout << "Inbox: " << inbox << std::endl;
         }
 
-        std::string server;
         std::string auth_file;
         std::string out_dir;
 
-        int port;
         bool encryption;
         std::string cert_dir = "/etc/ssl/certs";
         std::string cert_file;
         bool messages_new;
         bool messages_heads;
         std::string inbox;
+
+        std::string user_name = "turbosecretbahaha";
+        std::string user_password = "NICETRYxddd";
+        std::string server = "imap.centrum.sk";
+        std::string port;
 };

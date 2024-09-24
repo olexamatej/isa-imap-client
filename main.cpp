@@ -4,9 +4,11 @@
 #include "arg_parser.h"
 
 
+
 int main(int argc, char *argv[])
 {   
     Connection conn = parse_arg(argc, argv);
-    Runner runner(user_name, user_password, server);
+
+    Runner runner(conn);
     return 0;
 }

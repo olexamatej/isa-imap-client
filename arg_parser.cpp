@@ -18,7 +18,7 @@ Connection parse_arg(int argc, char *argv[])
                 std::cerr << "Error: -p requires a numeric argument\n";
                 exit(EXIT_FAILURE);
             }
-            conn.port = atoi(optarg);
+            conn.port = optarg;
             break;
     
         case 'T':
