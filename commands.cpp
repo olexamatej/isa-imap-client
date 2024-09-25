@@ -26,3 +26,12 @@ std::string Commands::list(uint8_t tag, const std::string& reference, const std:
     return command;
 }
 
+std::string Commands::fetch_all(uint8_t tag) {
+    std::string command = std::to_string(tag) + " FETCH 1:* BODY[]\r\n";
+    return command;
+}
+
+std::string Commands::select(uint8_t tag, const std::string& mailbox) {
+    std::string command = std::to_string(tag) + " SELECT " + mailbox + "\r\n";
+    return command;
+}

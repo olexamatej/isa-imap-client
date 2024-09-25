@@ -1,9 +1,8 @@
 #include "file_manager.h"
 
-void File_manager::get_auth_data()
+void File_manager::get_auth_data(Connection* conn)
 {
-    std::string login;
-    std::string password;
+    
 
     std::string line;
     std::ifstream file("auth_file");
@@ -13,7 +12,7 @@ void File_manager::get_auth_data()
         std::getline(file, line);
         if (line.substr(0, 8) == "username" && line[9] == '=' && line.size() > 11)
         {
-            login = line.substr(11);
+            conn->user_name = line.substr(11);
         }
         else
         {
@@ -24,7 +23,7 @@ void File_manager::get_auth_data()
         std::getline(file, line);
         if (line.substr(0, 8) == "password" && line[9] == '=' && line.size() > 11)
         {
-            password = line.substr(11);
+            conn->user_password = line.substr(11);
         }
         else
         {

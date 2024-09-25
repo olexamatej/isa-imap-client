@@ -32,27 +32,31 @@ void Client::init_openssl()
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
     ctx = SSL_CTX_new(TLS_client_method());
+
+    if (!SSL_CTX_load_verify_locations(ctx, "/etc/ssl/certs/ca-certificates.crt", nullptr)) {
+        std::cerr << "Failed to load CA certificates" << std::endl;
+        ERR_print_errors_fp(stderr);
+        exit(EXIT_FAILURE);
+    }
 }
 
-bool Client::verify_certificate(){
-    X509 *cert;
-    cert = SSL_get_peer_certificate(ssl);
-    if (cert == nullptr)
-    {
+bool Client::verify_certificate() {
+    X509 *cert = SSL_get_peer_certificate(ssl);
+    if (cert == nullptr) {
         std::cerr << "Error: No certificate provided by the server" << std::endl;
         return false;
     }
 
     // Verify the certificate
-    if (SSL_get_verify_result(ssl) != X509_V_OK)
-    {
-        std::cerr << "Error: Certificate verification failed" << std::endl;
+    long result = SSL_get_verify_result(ssl);
+    if (result != X509_V_OK) {
+        std::cerr << "Error: Certificate verification failed: " << X509_verify_cert_error_string(result) << std::endl;
         X509_free(cert);
         return false;
     }
+
     X509_free(cert);
     return true;
-
 }
 
 void Client::connect()

@@ -10,5 +10,7 @@ public:
     std::string logout(uint8_t tag);
     std::string list(uint8_t tag, const std::string& reference, const std::string& mailbox);
     std::string authenticate(uint8_t tag, const std::string& mechanism, const std::string& initial_response);
+    std::string fetch_all(uint8_t tag);
+    std::string select(uint8_t tag, const std::string& mailbox);
     
 };

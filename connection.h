@@ -28,10 +28,10 @@ class Connection{
         std::string cert_file;
         bool messages_new;
         bool messages_heads;
-        std::string inbox;
+        std::string inbox = "INBOX";
 
-        std::string user_name = "turbosecretbahaha";
-        std::string user_password = "NICETRYxddd";
+        std::string user_name = "";
+        std::string user_password = "";
         std::string server = "imap.centrum.sk";
         std::string port;
 };
