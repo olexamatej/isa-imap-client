@@ -6,7 +6,7 @@ CFLAGS := -std=c++2a -g
 LDFLAGS= -pthread -lssl -lcrypto
 
 # Source files
-SRCS := main.cpp client.cpp runner.cpp commands.cpp connection.cpp arg_parser.cpp
+SRCS := main.cpp client.cpp runner.cpp commands.cpp connection.cpp arg_parser.cpp file_manager.cpp
 
 # Object files
 OBJS := $(SRCS:.cpp=.o)
