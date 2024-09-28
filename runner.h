@@ -4,6 +4,7 @@
 #include "client.h"
 #include "commands.h"
 #include "connection.h"
+#include "msg_parser.h"
 
 
 class Runner {
