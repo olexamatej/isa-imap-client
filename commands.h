@@ -12,5 +12,8 @@ public:
     std::string authenticate(uint8_t tag, const std::string& mechanism, const std::string& initial_response);
     std::string fetch_all(uint8_t tag);
     std::string select(uint8_t tag, const std::string& mailbox);
+    std::string fetch_header(uint8_t tag, const std::string& mailbox, const std::string& message_id);
+    std::string fetch_body(uint8_t tag, const std::string& mailbox, const std::string& message_id);
+    std::string fetch(uint8_t tag, int message_id);
     
 };

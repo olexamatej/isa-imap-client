@@ -35,3 +35,13 @@ std::string Commands::select(uint8_t tag, const std::string& mailbox) {
     std::string command = std::to_string(tag) + " SELECT " + mailbox + "\r\n";
     return command;
 }
+
+std::string Commands::fetch_header(uint8_t tag, const std::string& mailbox, const std::string& message_id) {
+    std::string command = std::to_string(tag) + " FETCH " + message_id + " (BODY[HEADER])\r\n";
+    return command;
+}
+
+std::string Commands::fetch(uint8_t tag, int message_id) {
+    std::string command = std::to_string(tag) + " FETCH " + std::to_string(message_id) + " BODY[]\r\n";
+    return command;
+}

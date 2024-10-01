@@ -1,11 +1,12 @@
 #include "file_manager.h"
 
-void File_manager::get_auth_data(Connection* conn)
+
+void File_manager::get_auth_data(Connection* conn, std::string file_name)
 {
     
 
     std::string line;
-    std::ifstream file("auth_file");
+    std::ifstream file(file_name);
 
     if (file.is_open())
     {
@@ -37,4 +38,32 @@ void File_manager::get_auth_data(Connection* conn)
     }
 
     file.close();
+}
+
+void File_manager::save_mail(std::string file_name, std::string mail, std::string out_dir)
+{
+    std::ofstream file(out_dir + "/" + file_name);
+    if (file.is_open())
+    {
+        file << mail;
+    }
+    else
+    {
+        std::cout << "Error opening file" << std::endl;
+    }
+    file.close();
+}
+
+bool File_manager::check_existence(std::string file_name)
+{
+    std::ifstream file(file_name);
+    if (file.is_open())
+    {
+        file.close();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
