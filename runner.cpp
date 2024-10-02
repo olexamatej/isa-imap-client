@@ -3,7 +3,6 @@
 
 Runner::Runner(Connection conn, File_manager file_manager){ 
     Client client(conn.server, conn.port, conn.encryption);
-
     if(conn.encryption){
         if(!client.verify_certificate()){
             std::cout << "Certificate verification failed" << std::endl;
@@ -21,14 +20,14 @@ Runner::Runner(Connection conn, File_manager file_manager){
 
     std::cout << client.receive() << std::endl;
 
-    client.send(commands.fetch_header(tag++, "INBOX", "2"));
+    client.send(commands.fetch_header(tag++, "INBOX", 4 ));
     std::string response = client.receive();
     std::cout << response << std::endl;
     parser.get_file_name(response);
+    // std::cout << parser.get_file_name(response) << std::endl;
+    // client.send(commands.fetch(tag++, 4));
+    // response = client.receive();
 
-    client.send(commands.fetch(tag++, 2));
-    response = client.receive();
-
-    file_manager.save_mail(parser.get_file_name(response), response, conn.out_dir);
+    // file_manager.save_mail(parser.get_file_name(response), response, conn.out_dir);
 
 }

@@ -130,7 +130,7 @@ void Client::send(std::string message)
 // receive message
 std::string Client::receive()
 {
-    char buffer[2000];
+    char buffer[10000];
     ssize_t bytes_received;
     if (encryption == true)
     {

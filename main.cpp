@@ -10,7 +10,6 @@ int main(int argc, char *argv[])
     Connection conn = parse_arg(argc, argv);
     File_manager fm = File_manager();
     fm.get_auth_data(&conn, conn.auth_file);
-    std::cout << "password is : " <<  conn.user_name;
     Runner runner(conn, fm);
     return 0;
 }
