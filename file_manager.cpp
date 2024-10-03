@@ -44,7 +44,12 @@ void File_manager::save_mail(std::string file_name, std::string mail, std::strin
 {
     std::ofstream file(out_dir + "/" + file_name);
     if (file.is_open())
-    {
+    {   
+        size_t first_newline = mail.find('\n');
+        size_t last_newline = mail.rfind('\n');
+        if(first_newline != std::string::npos && last_newline != std::string::npos){
+            mail = mail.substr(first_newline + 1, last_newline - first_newline);
+        }
         file << mail;
     }
     else

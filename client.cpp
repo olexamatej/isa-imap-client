@@ -135,9 +135,10 @@ void Client::send(std::string message)
 std::string Client::receive(int tag)
 {
     tag = tag - 1;
-    char buffer[10000];
+    char buffer[5000];
     ssize_t bytes_received;
     std::string response;
+    std::string full_response;
     while (true)
     {
 
@@ -152,6 +153,7 @@ std::string Client::receive(int tag)
 
         response = std::string(buffer, bytes_received);
         std::string tag_str = std::to_string(tag);
+        full_response += response;
 
         if (response.rfind(tag_str + " OK") != std::string::npos ||
             response.rfind("* OK") != std::string::npos ||
@@ -171,5 +173,5 @@ std::string Client::receive(int tag)
         }
     }
     // std::cout << "Received " << bytes_received << " bytes from " << ip_address << ":" << port << std::endl;
-    return std::string(buffer, bytes_received);
+    return full_response;
 }
