@@ -2,8 +2,8 @@
 
 Connection::Connection(){
     this->encryption = false;
-    this->messages_new = false;
-    this->messages_heads = false;
+    this->only_message_headers = false;
+    this->only_new_messages = false;
     if(this->encryption){
         this->port = "993";
     }else{

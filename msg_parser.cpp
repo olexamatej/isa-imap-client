@@ -9,14 +9,49 @@ void MsgParser::get_message_count(const std::string response)
     }
 }
 
-void MsgParser::get_new_message_count(const std::string response)
+std::vector<int> MsgParser::get_new_messages(const std::string response)
 {
-    std::string::size_type pos = response.find("RECENT");
+    std::vector<int> new_messages;
+    std::string temp;
+    size_t pos = response.find("* SEARCH");
+
     if (pos != std::string::npos)
     {
-        this->new_messages = response[2] - '0';
+        pos += 8;
+
+        while (pos < response.length() && response[pos] != '\r' && response[pos] != '\n')
+        {
+            while (pos < response.length() && std::isspace(response[pos]))
+            {
+                pos++;
+            }
+
+            if (pos >= response.length() || response[pos] == '\r' || response[pos] == '\n')
+            {
+                break;
+            }
+
+            temp.clear();
+            while (pos < response.length() && std::isdigit(response[pos]))
+            {
+                temp += response[pos];
+                pos++;
+            }
+
+            if (!temp.empty())
+            {
+                new_messages.push_back(std::stoi(temp));
+            }
+
+            if (pos < response.length() && !std::isspace(response[pos]))
+            {
+                pos++;
+            }
+        }
     }
+    return new_messages;
 }
+
 
 void MsgParser::get_capability(const std::string response)
 {
@@ -120,11 +155,11 @@ std::string MsgParser::get_file_name(std::string response)
                 date = date.substr(0, i - 1);
                 break;
             }
-            else if(date[i] == ','){
-                date = date.substr(0, i) + date.substr(i+1, date.length() - i - 1);
+            else if (date[i] == ',')
+            {
+                date = date.substr(0, i) + date.substr(i + 1, date.length() - i - 1);
                 date[i] = '-';
             }
-        
         }
         header_info.push_back(date);
     }
@@ -151,12 +186,12 @@ std::string MsgParser::get_file_name(std::string response)
     std::string message_id = extract_header_field(response, "Message-ID: ");
     if (!message_id.empty())
     {
-        if(message_id[0] == '<'){
+        if (message_id[0] == '<')
+        {
             message_id = message_id.substr(1, message_id.length() - 2);
         }
         header_info.push_back(message_id);
     }
-
 
     std::string file_name = from + "-" + date + "-" + subject + "-" + message_id + ".eml";
     return file_name;

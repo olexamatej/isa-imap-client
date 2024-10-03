@@ -31,10 +31,10 @@ Connection parse_arg(int argc, char *argv[])
             conn.cert_dir = optarg;
             break;
         case 'n':
-            conn.messages_new = true;
+            conn.only_new_messages = true;
             break;
         case 'h':
-            conn.messages_heads = true;
+            conn.only_message_headers = true;
             break;
         case 'a':
             conn.auth_file = optarg;

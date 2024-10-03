@@ -50,3 +50,8 @@ std::string Commands::fetch(uint8_t tag, const int message_id) {
     std::string command = std::to_string(tag) + " FETCH " + std::to_string(message_id) + " BODY[]\r\n";
     return command;
 }
+
+std::string Commands::get_new_messages(uint8_t tag) {
+    std::string command = std::to_string(tag) + " SEARCH NEW\r\n";
+    return command;
+}

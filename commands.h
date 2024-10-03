@@ -16,5 +16,6 @@ public:
     std::string fetch_header(uint8_t tag, const std::string& mailbox, const int message_id);
     std::string fetch_body(uint8_t tag, const std::string& mailbox, const int message_id);
     std::string fetch(uint8_t tag, int message_id);
+    std::string get_new_messages(uint8_t tag);
     
 };
