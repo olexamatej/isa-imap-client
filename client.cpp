@@ -33,23 +33,27 @@ void Client::init_openssl()
     SSL_load_error_strings();
     ctx = SSL_CTX_new(TLS_client_method());
 
-    if (!SSL_CTX_load_verify_locations(ctx, "/etc/ssl/certs/ca-certificates.crt", nullptr)) {
+    if (!SSL_CTX_load_verify_locations(ctx, "/etc/ssl/certs/ca-certificates.crt", nullptr))
+    {
         std::cerr << "Failed to load CA certificates" << std::endl;
         ERR_print_errors_fp(stderr);
         exit(EXIT_FAILURE);
     }
 }
 
-bool Client::verify_certificate() {
+bool Client::verify_certificate()
+{
     X509 *cert = SSL_get_peer_certificate(ssl);
-    if (cert == nullptr) {
+    if (cert == nullptr)
+    {
         std::cerr << "Error: No certificate provided by the server" << std::endl;
         return false;
     }
 
     // Verify the certificate
     long result = SSL_get_verify_result(ssl);
-    if (result != X509_V_OK) {
+    if (result != X509_V_OK)
+    {
         std::cerr << "Error: Certificate verification failed: " << X509_verify_cert_error_string(result) << std::endl;
         X509_free(cert);
         return false;
@@ -128,27 +132,43 @@ void Client::send(std::string message)
 }
 
 // receive message
-std::string Client::receive()
+std::string Client::receive(int tag)
 {
+    tag = tag - 1;
     char buffer[10000];
     ssize_t bytes_received;
-    if (encryption == true)
+    std::string response;
+    while (true)
     {
-        bytes_received = SSL_read(ssl, buffer, sizeof(buffer));
-    }
-    else
-    {
-        bytes_received = recv(_socket, buffer, sizeof(buffer), 0);
-    }
 
-    if (bytes_received == -1)
-    {
-        if (errno != EAGAIN && errno != EWOULDBLOCK)
+        if (encryption == true)
         {
-            perror("recv");
+            bytes_received = SSL_read(ssl, buffer, sizeof(buffer));
         }
-        // Return empty string to indicate no data available
-        return "";
+        else
+        {
+            bytes_received = recv(_socket, buffer, sizeof(buffer), 0);
+        }
+
+        response = std::string(buffer, bytes_received);
+        std::string tag_str = std::to_string(tag);
+
+        if (response.rfind(tag_str + " OK") != std::string::npos ||
+            response.rfind("* OK") != std::string::npos ||
+            response.rfind(tag_str + " NO") != std::string::npos ||
+            response.rfind(tag_str + " BAD") != std::string::npos)
+        {
+            break;
+        }
+        if (bytes_received == -1)
+        {
+            if (errno != EAGAIN && errno != EWOULDBLOCK)
+            {
+                perror("recv");
+            }
+            // Return empty string to indicate no data available
+            return "";
+        }
     }
     // std::cout << "Received " << bytes_received << " bytes from " << ip_address << ":" << port << std::endl;
     return std::string(buffer, bytes_received);

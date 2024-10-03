@@ -10,24 +10,29 @@ Runner::Runner(Connection conn, File_manager file_manager){
         }
     }
 
-    std::cout << client.receive() << std::endl;
     Commands commands = Commands();
     MsgParser parser = MsgParser();
 
+    client.receive(tag);
+
     client.send(commands.login(tag++, conn.user_name, conn.user_password));
-    std::cout << client.receive() << std::endl;
+    parser.get_capability(client.receive(tag));
     client.send(commands.select(tag++, "INBOX"));
+    std::string response = client.receive(tag);
+    parser.get_message_count(response);
+    parser.get_new_message_count(response);
 
-    std::cout << client.receive() << std::endl;
+    // for(int i = 1; i <= parser.message_count; i++){
+    client.send(commands.fetch_header_important(tag++, "INBOX", 4));
+    response = client.receive(tag);
+    
+    std::string file_name = parser.get_file_name(response);
 
-    client.send(commands.fetch_header(tag++, "INBOX", 4 ));
-    std::string response = client.receive();
+    client.send(commands.fetch(tag++, 4));
+    response = client.receive(tag);
     std::cout << response << std::endl;
-    parser.get_file_name(response);
-    // std::cout << parser.get_file_name(response) << std::endl;
-    // client.send(commands.fetch(tag++, 4));
-    // response = client.receive();
 
-    // file_manager.save_mail(parser.get_file_name(response), response, conn.out_dir);
-
+    
+    // std::cout << response << std::endl;
+    file_manager.save_mail(file_name, response, conn.out_dir);
 }

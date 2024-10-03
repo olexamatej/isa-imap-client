@@ -18,7 +18,7 @@ class Client {
         ~Client();
         void send(std::string message);
         void connect();
-        std::string receive();
+        std::string receive(int tag);
         void receiveTimeout(int){};
         void init_openssl();
         bool verify_certificate();
