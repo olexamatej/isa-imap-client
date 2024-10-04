@@ -4,7 +4,7 @@ Connection parse_arg(int argc, char *argv[])
 {
     Connection conn;
     int opt;
-
+    bool cert_set = false;
     opterr = 0;
     // parse command line arguments, it checks long and short versions
     while ((opt = getopt(argc, argv, "p:Tc:C:nha:b:o:")) != -1)
@@ -26,9 +26,11 @@ Connection parse_arg(int argc, char *argv[])
             break;
         case 'c':
             conn.cert_file = optarg;
+            cert_set = true;
             break;
         case 'C':
             conn.cert_dir = optarg;
+            cert_set;
             break;
         case 'n':
             conn.only_new_messages = true;
@@ -72,6 +74,10 @@ Connection parse_arg(int argc, char *argv[])
             conn.port = "143";
         }
     }
+    if(cert_set && conn.encryption == false){
+        std::cerr << "WARNING: Certificate file set, but encryption is not enabled\n";
+    }
+    
 
     return conn;
 }

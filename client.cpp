@@ -2,7 +2,7 @@
 #include <openssl/ssl.h>
 
 // creating connection
-Client::Client(std::string ip_address, std::string port, bool encryption)
+Client::Client(std::string ip_address, std::string port, bool encryption, std::string cert_file, std::string cert_dir)
 {
     this->ip_address = ip_address;
     this->port = port;
@@ -10,7 +10,7 @@ Client::Client(std::string ip_address, std::string port, bool encryption)
 
     if (encryption)
     {
-        init_openssl();
+        init_openssl(cert_file, cert_dir);
     }
     connect();
 }
@@ -26,14 +26,17 @@ Client::~Client()
     EVP_cleanup();
 }
 
-void Client::init_openssl()
+void Client::init_openssl(std::string cert_file, std::string cert_dir)
 {
     SSL_library_init();
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
     ctx = SSL_CTX_new(TLS_client_method());
 
-    if (!SSL_CTX_load_verify_locations(ctx, "/etc/ssl/certs/ca-certificates.crt", nullptr))
+    const char *cert_file_ptr = cert_file.c_str() ? nullptr : cert_file.c_str();
+    
+
+    if (!SSL_CTX_load_verify_locations(ctx, cert_file_ptr, cert_dir.c_str()))
     {
         std::cerr << "Failed to load CA certificates" << std::endl;
         ERR_print_errors_fp(stderr);

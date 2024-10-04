@@ -2,7 +2,7 @@
 
 Runner::Runner(Connection conn, File_manager file_manager)
 {
-    Client client(conn.server, conn.port, conn.encryption);
+    Client client(conn.server, conn.port, conn.encryption, conn.cert_file, conn.cert_dir);
 
     if (conn.encryption)
     {
