@@ -7,7 +7,7 @@ Connection parse_arg(int argc, char *argv[])
     bool cert_set = false;
     opterr = 0;
     // parse command line arguments, it checks long and short versions
-    while ((opt = getopt(argc, argv, "p:Tc:C:nha:b:o:")) != -1)
+    while ((opt = getopt(argc, argv, "p:Tc:C:nha:b:o:i")) != -1)
     {
         switch (opt)
         {
@@ -20,7 +20,10 @@ Connection parse_arg(int argc, char *argv[])
             }
             conn.port = optarg;
             break;
-
+        case 'i':
+            conn.interactive = true;
+            break;
+            
         case 'T':
             conn.encryption = true;
             break;
@@ -54,13 +57,17 @@ Connection parse_arg(int argc, char *argv[])
     }
 
     // After processing options, set conn.server to the next argument
+    if(conn.auth_file.empty() || conn.out_dir.empty()){
+        std::cerr << "Error: Auth file and out dir are required\n";
+        exit(EXIT_FAILURE);
+    }
     if (optind < argc)
     {
         conn.server = argv[optind];
     }
     else
     {
-        std::cerr << "Error: server argument is required\n";
+        std::cerr << "Error: No server address provided\n";
         exit(EXIT_FAILURE);
     }
     if (conn.port.empty())

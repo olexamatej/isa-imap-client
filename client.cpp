@@ -162,10 +162,11 @@ std::string Client::receive(int tag)
         {
             break;
         }
+        
         else if (response.rfind(tag_str + " NO") != std::string::npos ||
                  response.rfind(tag_str + " BAD") != std::string::npos)
         {
-            std::cerr << "ERROR: Message received with error" << std::endl;
+            std::cerr << "ERROR: Problem with server" << std::endl;
             exit(1);
         }
 
