@@ -34,7 +34,6 @@ void Client::init_openssl(std::string cert_file, std::string cert_dir)
     ctx = SSL_CTX_new(TLS_client_method());
 
     const char *cert_file_ptr = cert_file.c_str() ? nullptr : cert_file.c_str();
-    
 
     if (!SSL_CTX_load_verify_locations(ctx, cert_file_ptr, cert_dir.c_str()))
     {
@@ -159,12 +158,17 @@ std::string Client::receive(int tag)
         full_response += response;
 
         if (response.rfind(tag_str + " OK") != std::string::npos ||
-            response.rfind("* OK") != std::string::npos ||
-            response.rfind(tag_str + " NO") != std::string::npos ||
-            response.rfind(tag_str + " BAD") != std::string::npos)
+            response.rfind("* OK") != std::string::npos)
         {
             break;
         }
+        else if (response.rfind(tag_str + " NO") != std::string::npos ||
+                 response.rfind(tag_str + " BAD") != std::string::npos)
+        {
+            std::cerr << "ERROR: Message received with error" << std::endl;
+            exit(1);
+        }
+
         if (bytes_received == -1)
         {
             if (errno != EAGAIN && errno != EWOULDBLOCK)

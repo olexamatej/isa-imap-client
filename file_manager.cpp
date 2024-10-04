@@ -47,11 +47,21 @@ void File_manager::save_mail(std::string file_name, std::string mail, std::strin
     if (file.is_open())
     {   
         size_t first_newline = mail.find('\n');
-        size_t last_newline = mail.rfind('\n');
-        if(first_newline != std::string::npos && last_newline != std::string::npos){
-            mail = mail.substr(first_newline + 1, last_newline - first_newline);
+        
+        // find last parenthese, that is where the mail ends
+        size_t last_paren = mail.rfind(')');
+        
+        size_t last_newline = mail.rfind('\n', last_paren);
+        
+        if (first_newline != std::string::npos && last_newline != std::string::npos && first_newline < last_newline)
+        {
+            std::string email_content = mail.substr(first_newline + 1, last_newline - first_newline - 1);
+            file << email_content;
         }
-        file << mail;
+        else
+        {
+            file << mail;
+        }
     }
     else
     {   
