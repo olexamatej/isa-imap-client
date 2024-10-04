@@ -43,6 +43,7 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
 void File_manager::save_mail(std::string file_name, std::string mail, std::string out_dir)
 {
     std::ofstream file(out_dir + "/" + file_name);
+    
     if (file.is_open())
     {   
         size_t first_newline = mail.find('\n');

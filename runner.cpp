@@ -32,22 +32,49 @@ Runner::Runner(Connection conn, File_manager file_manager)
     std::vector<int> new_messages = parser.get_new_messages(response);
     std::cout << "New messages: " << new_messages.size() << std::endl;
 
-    if (conn.only_new_messages)
+    if(conn.only_new_messages && conn.only_message_headers){
+        for(int i = 0; i < new_messages.size(); i++){
+         client.send(commands.fetch_header_important(tag++,new_messages[i]));
+            response = client.receive(tag);
+            std::string file_name = parser.get_file_name(response);
+            if (file_manager.check_existence(conn.out_dir + "/" + file_name))
+            {
+                continue;
+            }
+
+            client.send(commands.fetch_header(tag++, new_messages[i]));
+
+            response = client.receive(tag);
+   
+
+            file_manager.save_mail("H-" + file_name, response, conn.out_dir);
+        }
+    }
+
+    else if (conn.only_new_messages)
     {
         for (int i = 0; i < new_messages.size(); i++)
         {
-            client.send(commands.fetch(tag++, new_messages[i]));
+            client.send(commands.fetch_header_important(tag++, new_messages[i]));
             response = client.receive(tag);
             std::string file_name = parser.get_file_name(response);
+            if (file_manager.check_existence(conn.out_dir + "/" + file_name))
+            {
+                continue;
+            }
+
+            client.send(commands.fetch(tag++, new_messages[i]));
+            response = client.receive(tag);
+
             file_manager.save_mail(file_name, response, conn.out_dir);
         }
     }
 
-    if (conn.only_message_headers)
+    else if (conn.only_message_headers)
     {
         for (int i = 1; i <= parser.message_count; i++)
         {
-            client.send(commands.fetch_header_important(tag++, conn.inbox, i));
+            client.send(commands.fetch_header_important(tag++, i));
             response = client.receive(tag);
             std::string file_name = parser.get_file_name(response);
             if (file_manager.check_existence(conn.out_dir + "/" + file_name))
@@ -56,7 +83,7 @@ Runner::Runner(Connection conn, File_manager file_manager)
                 continue;
             }
 
-            client.send(commands.fetch_header(tag++, conn.inbox, i));
+            client.send(commands.fetch_header(tag++,  i));
             response = client.receive(tag);
             file_manager.save_mail("H-" + file_name, response, conn.out_dir);
         }
@@ -66,7 +93,7 @@ Runner::Runner(Connection conn, File_manager file_manager)
         int start = conn.only_new_messages ? parser.message_count - parser.new_messages + 1 : 1;
         for (int i = start; i <= parser.message_count; i++)
         {
-            client.send(commands.fetch_header_important(tag++, conn.inbox, i));
+            client.send(commands.fetch_header_important(tag++, i));
             response = client.receive(tag);
             std::string file_name = parser.get_file_name(response);
 

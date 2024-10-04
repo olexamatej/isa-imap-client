@@ -32,13 +32,13 @@ std::string Commands::select(uint8_t tag, const std::string& mailbox) {
     return command;
 }
 
-std::string Commands::fetch_header_important(uint8_t tag, const std::string& mailbox, const int message_id) {
+std::string Commands::fetch_header_important(uint8_t tag, const int message_id) {
     std::string command = std::to_string(tag) + " FETCH " + std::to_string(message_id) + " (BODY.PEEK[HEADER.FIELDS (Date From Message-ID Subject)])\r\n";
     return command;
 }
 
-std::string Commands::fetch_header(uint8_t tag, const std::string& mailbox, const int message_id) {
-    std::string command = std::to_string(tag) + " FETCH " + std::to_string(message_id) + "(BODY[HEADER])\r\n";
+std::string Commands::fetch_header(uint8_t tag, const int message_id) {
+    std::string command = std::to_string(tag) + " FETCH " + std::to_string(message_id) + " BODY[HEADER]\r\n";
     return command;
 }
 
