@@ -20,9 +20,9 @@ Connection parse_arg(int argc, char *argv[])
             }
             conn.port = optarg;
             break;
-    
+
         case 'T':
-            conn.encryption= true;
+            conn.encryption = true;
             break;
         case 'c':
             conn.cert_file = optarg;
@@ -44,7 +44,7 @@ Connection parse_arg(int argc, char *argv[])
             break;
         case 'o':
             conn.out_dir = optarg;
-            break;        
+            break;
         default:
             std::cerr << "Unknown option: " << opt << std::endl;
             exit(EXIT_FAILURE);
@@ -60,6 +60,17 @@ Connection parse_arg(int argc, char *argv[])
     {
         std::cerr << "Error: server argument is required\n";
         exit(EXIT_FAILURE);
+    }
+    if (conn.port.empty())
+    {
+        if (conn.encryption)
+        {
+            conn.port = "993";
+        }
+        else
+        {
+            conn.port = "143";
+        }
     }
 
     return conn;

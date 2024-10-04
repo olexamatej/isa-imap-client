@@ -72,3 +72,11 @@ bool File_manager::check_existence(std::string file_name)
         return false;
     }
 }
+
+void File_manager::remove_file(std::string file_name)
+{
+    if (remove(file_name.c_str()) != 0)
+    {
+        std::cout << "Error deleting file" << std::endl;
+    }
+}

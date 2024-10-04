@@ -13,5 +13,6 @@ public:
     void get_auth_data(Connection* conn, std::string file_name);
     void save_mail(std::string file_name, std::string mail, std::string out_dir);
     bool check_existence(std::string file_name);
+    void remove_file(std::string file_name);
 
 };

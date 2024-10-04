@@ -138,8 +138,7 @@ std::string MsgParser::extract_header_field(const std::string header, const std:
 // gets date, from, subject and message id
 std::string MsgParser::get_file_name(std::string response)
 {
-    std::vector<std::string> header_info;
-
+    
     std::string date = extract_header_field(response, "Date: ");
 
     if (!date.empty())
@@ -161,7 +160,6 @@ std::string MsgParser::get_file_name(std::string response)
                 date[i] = '-';
             }
         }
-        header_info.push_back(date);
     }
 
     std::string from = extract_header_field(response, "From: ");
@@ -174,14 +172,10 @@ std::string MsgParser::get_file_name(std::string response)
         {
             from = from.substr(start_pos + 1, end_pos - start_pos - 1);
         }
-        header_info.push_back(from);
     }
 
     std::string subject = extract_header_field(response, "Subject: ");
-    if (!subject.empty())
-    {
-        header_info.push_back(subject);
-    }
+    
 
     std::string message_id = extract_header_field(response, "Message-ID: ");
     if (!message_id.empty())
@@ -190,9 +184,9 @@ std::string MsgParser::get_file_name(std::string response)
         {
             message_id = message_id.substr(1, message_id.length() - 2);
         }
-        header_info.push_back(message_id);
     }
 
+ 
     std::string file_name = from + "-" + date + "-" + subject + "-" + message_id + ".eml";
     return file_name;
 }
