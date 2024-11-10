@@ -66,7 +66,7 @@ void File_manager::save_mail(std::string file_name, std::string mail, std::strin
     }
     else
     {   
-        std::cout << "Error opening filelexa" << std::endl;
+        std::cout << "Error opening file" << std::endl;
     }
     file.close();
 }
