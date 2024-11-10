@@ -13,7 +13,7 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
         std::getline(file, line);
         if (line.substr(0, 8) == "username" && line[9] == '=' && line.size() > 11)
         {
-            conn->user_name = line.substr(11);
+            conn->user_name_ = line.substr(11);
         }
         else
         {
@@ -24,7 +24,7 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
         std::getline(file, line);
         if (line.substr(0, 8) == "password" && line[9] == '=' && line.size() > 11)
         {
-            conn->user_password = line.substr(11);
+            conn->user_password_ = line.substr(11);
         }
         else
         {
@@ -40,9 +40,10 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
     file.close();
 }
 
-void File_manager::save_mail(std::string file_name, std::string mail, std::string out_dir)
+//TODO here is error on auto tests
+void File_manager::save_mail(std::string file_name, std::string mail, std::string out_dir_)
 {
-    std::ofstream file(out_dir + "/" + file_name);
+    std::ofstream file(out_dir_ + "/" + file_name);
     
     if (file.is_open())
     {   
@@ -65,7 +66,7 @@ void File_manager::save_mail(std::string file_name, std::string mail, std::strin
     }
     else
     {   
-        std::cout << "Error opening file" << std::endl;
+        std::cout << "Error opening filelexa" << std::endl;
     }
     file.close();
 }

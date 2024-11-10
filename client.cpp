@@ -2,15 +2,15 @@
 #include <openssl/ssl.h>
 
 // creating connection
-Client::Client(std::string ip_address, std::string port, bool encryption, std::string cert_file, std::string cert_dir)
+Client::Client(std::string ip_address, std::string port_, bool encryption_, std::string cert_file_, std::string cert_dir_)
 {
-    this->ip_address = ip_address;
-    this->port = port;
-    this->encryption = encryption;
+    this->ip_address_ = ip_address;
+    this->port_ = port_;
+    this->encryption_ = encryption_;
 
-    if (encryption)
+    if (encryption_)
     {
-        init_openssl(cert_file, cert_dir);
+        init_openssl(cert_file_, cert_dir_);
     }
     connect();
 }
@@ -18,7 +18,7 @@ Client::Client(std::string ip_address, std::string port, bool encryption, std::s
 Client::~Client()
 {
     close(_socket);
-    if (encryption)
+    if (encryption_)
     {
         SSL_free(ssl);
         SSL_CTX_free(ctx);
@@ -26,16 +26,16 @@ Client::~Client()
     EVP_cleanup();
 }
 
-void Client::init_openssl(std::string cert_file, std::string cert_dir)
+void Client::init_openssl(std::string cert_file_, std::string cert_dir_)
 {
     SSL_library_init();
     OpenSSL_add_all_algorithms();
     SSL_load_error_strings();
     ctx = SSL_CTX_new(TLS_client_method());
 
-    const char *cert_file_ptr = cert_file.c_str() ? nullptr : cert_file.c_str();
+    const char *cert_file__ptr = cert_file_.empty() ? nullptr : cert_file_.c_str();
 
-    if (!SSL_CTX_load_verify_locations(ctx, cert_file_ptr, cert_dir.c_str()))
+    if (!SSL_CTX_load_verify_locations(ctx, cert_file__ptr, cert_dir_.c_str()))
     {
         std::cerr << "Failed to load CA certificates" << std::endl;
         ERR_print_errors_fp(stderr);
@@ -48,7 +48,7 @@ bool Client::verify_certificate()
     X509 *cert = SSL_get_peer_certificate(ssl);
     if (cert == nullptr)
     {
-        std::cerr << "Error: No certificate provided by the server" << std::endl;
+        std::cerr << "Error: No certificate provided by the server_" << std::endl;
         return false;
     }
 
@@ -76,7 +76,7 @@ void Client::connect()
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = 0;
     // get ip from domain
-    if ((status = getaddrinfo(ip_address.c_str(), port.c_str(), &hints, &servinfo)) != 0)
+    if ((status = getaddrinfo(ip_address_.c_str(), port_.c_str(), &hints, &servinfo)) != 0)
     {
         fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
         exit(1);
@@ -100,9 +100,9 @@ void Client::connect()
         }
     }
 
-    // encryption
+    // encryption_
 
-    if (encryption == true)
+    if (encryption_ == true)
     {
         ssl = SSL_new(ctx);
         SSL_set_fd(ssl, _socket);
@@ -119,7 +119,8 @@ void Client::connect()
 // send message
 void Client::send(std::string message)
 {
-    if (encryption == true)
+    std::cout << "SENDING " << message << std::endl;
+    if (encryption_ == true)
     {
         SSL_write(ssl, message.c_str(), message.size());
     }
@@ -136,15 +137,15 @@ void Client::send(std::string message)
 // receive message
 std::string Client::receive(int tag)
 {
-    tag = tag - 1;
     char buffer[5000];
     ssize_t bytes_received;
     std::string response;
     std::string full_response;
+
     while (true)
     {
 
-        if (encryption == true)
+        if (encryption_ == true)
         {
             bytes_received = SSL_read(ssl, buffer, sizeof(buffer));
         }
@@ -157,8 +158,13 @@ std::string Client::receive(int tag)
         std::string tag_str = std::to_string(tag);
         full_response += response;
 
-        if (response.rfind(tag_str + " OK") != std::string::npos ||
-            response.rfind("* OK") != std::string::npos)
+        //if there was also a BYE message, we need to break
+        if(response.rfind(tag_str + " OK BYE") != std::string::npos){
+            break;
+        }
+
+        if ((response.rfind(tag_str + " OK") != std::string::npos) || (
+            response.rfind("* OK") != std::string::npos))
         {
             break;
         }
@@ -166,9 +172,12 @@ std::string Client::receive(int tag)
         else if (response.rfind(tag_str + " NO") != std::string::npos ||
                  response.rfind(tag_str + " BAD") != std::string::npos)
         {
-            std::cerr << "ERROR: Problem with server" << std::endl;
+            std::cerr << "ERROR: Problem with server_" << std::endl;
             exit(1);
         }
+        // else{
+        //     std::cout << "TOTO - " << tag_str + " OK" << std::endl;
+        // }
 
         if (bytes_received == -1)
         {
@@ -180,6 +189,6 @@ std::string Client::receive(int tag)
             return "";
         }
     }
-    // std::cout << "Received " << bytes_received << " bytes from " << ip_address << ":" << port << std::endl;
+    // std::cout << "Received " << bytes_received << " bytes from " << ip_address << ":" << port_ << std::endl;
     return full_response;
 }

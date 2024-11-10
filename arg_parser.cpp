@@ -11,44 +11,44 @@ Connection parse_arg(int argc, char *argv[])
     {
         switch (opt)
         {
-            // port
+            // port_
         case 'p':
             if (optarg == NULL)
             {
                 std::cerr << "Error: -p requires a numeric argument\n";
                 exit(EXIT_FAILURE);
             }
-            conn.port = optarg;
+            conn.port_ = optarg;
             break;
         case 'i':
-            conn.interactive = true;
+            conn.interactive_ = true;
             break;
             
         case 'T':
-            conn.encryption = true;
+            conn.encryption_ = true;
             break;
         case 'c':
-            conn.cert_file = optarg;
+            conn.cert_file_ = optarg;
             cert_set = true;
             break;
         case 'C':
-            conn.cert_dir = optarg;
+            conn.cert_dir_ = optarg;
             cert_set;
             break;
         case 'n':
-            conn.only_new_messages = true;
+            conn.only_new_messages_ = true;
             break;
         case 'h':
-            conn.only_message_headers = true;
+            conn.only_message_headers_ = true;
             break;
         case 'a':
-            conn.auth_file = optarg;
+            conn.auth_file_ = optarg;
             break;
         case 'b':
-            conn.inbox = optarg;
+            conn.inbox_ = optarg;
             break;
         case 'o':
-            conn.out_dir = optarg;
+            conn.out_dir_ = optarg;
             break;
         default:
             std::cerr << "Unknown option: " << opt << std::endl;
@@ -56,33 +56,33 @@ Connection parse_arg(int argc, char *argv[])
         }
     }
 
-    // After processing options, set conn.server to the next argument
-    if(conn.auth_file.empty() || conn.out_dir.empty()){
+    // After processing options, set conn.server_ to the next argument
+    if(conn.auth_file_.empty() || conn.out_dir_.empty()){
         std::cerr << "Error: Auth file and out dir are required\n";
         exit(EXIT_FAILURE);
     }
     if (optind < argc)
     {
-        conn.server = argv[optind];
+        conn.server_ = argv[optind];
     }
     else
     {
-        std::cerr << "Error: No server address provided\n";
+        std::cerr << "Error: No server_ address provided\n";
         exit(EXIT_FAILURE);
     }
-    if (conn.port.empty())
+    if (conn.port_.empty())
     {
-        if (conn.encryption)
+        if (conn.encryption_)
         {
-            conn.port = "993";
+            conn.port_ = "993";
         }
         else
         {
-            conn.port = "143";
+            conn.port_ = "143";
         }
     }
-    if(cert_set && conn.encryption == false){
-        std::cerr << "WARNING: Certificate file set, but encryption is not enabled\n";
+    if(cert_set && conn.encryption_ == false){
+        std::cerr << "WARNING: Certificate file set, but encryption_ is not enabled\n";
     }
     
 

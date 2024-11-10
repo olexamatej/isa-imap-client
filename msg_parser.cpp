@@ -5,13 +5,13 @@ void MsgParser::get_message_count(const std::string response)
     std::string::size_type pos = response.find("EXISTS");
     if (pos != std::string::npos)
     {
-        this->message_count = response[2] - '0';
+        this->message_count_= response[2] - '0';
     }
 }
 
 std::vector<int> MsgParser::get_new_messages(const std::string response)
 {
-    std::vector<int> new_messages;
+    std::vector<int> new_messages_;
     std::string temp;
     size_t pos = response.find("* SEARCH");
 
@@ -40,7 +40,7 @@ std::vector<int> MsgParser::get_new_messages(const std::string response)
 
             if (!temp.empty())
             {
-                new_messages.push_back(std::stoi(temp));
+                new_messages_.push_back(std::stoi(temp));
             }
 
             if (pos < response.length() && !std::isspace(response[pos]))
@@ -49,7 +49,7 @@ std::vector<int> MsgParser::get_new_messages(const std::string response)
             }
         }
     }
-    return new_messages;
+    return new_messages_;
 }
 
 
@@ -85,7 +85,7 @@ void MsgParser::get_capability(const std::string response)
             // Ensure we have a valid capability to push
             if (start_pos != pos)
             {
-                this->capabilities.push_back(response.substr(start_pos, pos - start_pos));
+                this->capabilities_.push_back(response.substr(start_pos, pos - start_pos));
             }
         }
     }
@@ -106,7 +106,7 @@ void MsgParser::get_mailbox_names(const std::string response)
             pos++;
         }
 
-        this->mailbox_list.push_back(mailbox);
+        this->mailbox_list_.push_back(mailbox);
 
         pos += 2; // next line
     }

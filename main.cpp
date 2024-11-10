@@ -11,8 +11,9 @@ int main(int argc, char *argv[])
 
 
     File_manager fm = File_manager();
-    fm.get_auth_data(&conn, conn.auth_file);
+    fm.get_auth_data(&conn, conn.auth_file_);
     Runner runner(conn, fm);
+    runner.run();
 
     
 

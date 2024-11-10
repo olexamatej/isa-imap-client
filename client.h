@@ -14,19 +14,19 @@
 
 class Client {
     public:
-        Client(std::string ip_address, std::string port, bool encryption, std::string cert_file, std::string cert_dir);
+        Client(std::string ip_address, std::string port_, bool encryption_, std::string cert_file_, std::string cert_dir_);
         ~Client();
         void send(std::string message);
         void connect();
         std::string receive(int tag);
         void receiveTimeout(int){};
-        void init_openssl(std::string cert_file, std::string cert_dir);
+        void init_openssl(std::string cert_file_, std::string cert_dir_);
         bool verify_certificate();
     private:
         int _socket;
-        std::string ip_address;
-        std::string port;
-        bool encryption;
+        std::string ip_address_;
+        std::string port_;
+        bool encryption_;
 
         SSL_CTX* ctx;
         SSL* ssl;

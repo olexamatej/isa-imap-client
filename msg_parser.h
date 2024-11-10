@@ -18,12 +18,9 @@ public:
     std::string extract_header_field(const std::string header, const std::string field);
     std::string get_file_name(const std::string response);
 
-    std::vector<std::string> capabilities;
-    std::vector<std::string> mailbox_list;
-    int message_count = 0;
-    int new_messages;
+    std::vector<std::string> capabilities_;
+    std::vector<std::string> mailbox_list_;
+    int message_count_ = 0;
+    int new_messages_;
 
-
-private:
-    std::string mailbox_name;
 };  
