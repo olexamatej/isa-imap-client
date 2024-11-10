@@ -10,6 +10,7 @@
 #include <string>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <utility>
 
 
 class Client {
@@ -18,7 +19,7 @@ class Client {
         ~Client();
         void send(std::string message);
         void connect();
-        std::string receive(int tag);
+        std::pair<std::string,bool> receive(int tag);
         void receiveTimeout(int){};
         void init_openssl(std::string cert_file_, std::string cert_dir_);
         bool verify_certificate();

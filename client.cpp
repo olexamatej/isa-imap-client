@@ -1,5 +1,5 @@
 #include "client.h"
-#include <openssl/ssl.h>
+
 
 // creating connection
 Client::Client(std::string ip_address, std::string port_, bool encryption_, std::string cert_file_, std::string cert_dir_)
@@ -135,12 +135,13 @@ void Client::send(std::string message)
 }
 
 // receive message
-std::string Client::receive(int tag)
+std::pair<std::string, bool> Client::receive(int tag)
 {
     char buffer[5000];
     ssize_t bytes_received;
     std::string response;
     std::string full_response;
+    bool bye = false;
 
     while (true)
     {
@@ -160,6 +161,7 @@ std::string Client::receive(int tag)
 
         //if there was also a BYE message, we need to break
         if(response.rfind(tag_str + " OK BYE") != std::string::npos){
+            bye = true;
             break;
         }
 
@@ -186,9 +188,9 @@ std::string Client::receive(int tag)
                 perror("recv");
             }
             // Return empty string to indicate no data available
-            return "";
+            return std::make_pair("", bye);
         }
     }
     // std::cout << "Received " << bytes_received << " bytes from " << ip_address << ":" << port_ << std::endl;
-    return full_response;
+    return std::make_pair(full_response, bye);
 }
