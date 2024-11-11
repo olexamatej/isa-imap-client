@@ -5,14 +5,15 @@ CFLAGS := -std=c++2a -g
 
 LDFLAGS= -pthread -lssl -lcrypto
 
+SRC_DIR := src
 # Source files
-SRCS := main.cpp client.cpp runner.cpp commands.cpp connection.cpp arg_parser.cpp file_manager.cpp msg_parser.cpp
+SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 
 # Object files
-OBJS := $(SRCS:.cpp=.o)
+OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(SRC_DIR)/%.o, $(SRCS))
 
 # Header files
-HDRS := $(wildcard *.h)
+HDRS := $(wildcard $(SRC_DIR)/*.h)
 
 # Target executable
 TARGET := imapcl 
