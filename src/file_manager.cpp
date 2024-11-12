@@ -17,7 +17,7 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
         }
         else
         {
-            std::cout << "Error reading login" << std::endl;
+            std::cerr << "Error reading login" << std::endl;
             exit(1);
         }
 
@@ -28,13 +28,13 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
         }
         else
         {
-            std::cout << "Error reading password" << std::endl;
+            std::cerr << "Error reading password" << std::endl;
             exit(1);
         }
     }
     else
     {
-        std::cout << "Error opening file when getting data" << std::endl;
+        std::cerr << "Error opening file when getting data" << std::endl;
     }
 
     file.close();
@@ -45,10 +45,10 @@ void File_manager::save_mail(std::string file_name, std::string mail, std::strin
 {
     std::ofstream file(out_dir_ + "/" + file_name);
     if(file_name.length() > 256){
-        std::cout << "Error: Could not get file name" << std::endl;
+        std::cerr << "Error: Could not get file name" << std::endl;
     }
     else if(file_name.find('/') != std::string::npos){
-        std::cout << "Error: Invalid file name" << std::endl;
+        std::cerr << "Error: Invalid file name" << std::endl;
     }
 
     else{
@@ -73,7 +73,7 @@ void File_manager::save_mail(std::string file_name, std::string mail, std::strin
     }
     else
     {   
-        std::cout << "Error opening file" << std::endl;
+        std::cerr << "Error opening file" << std::endl;
     }
     file.close();
     }
@@ -97,6 +97,6 @@ void File_manager::remove_file(std::string file_name)
 {
     if (remove(file_name.c_str()) != 0)
     {
-        std::cout << "Error deleting file" << std::endl;
+        std::cerr << "Error deleting file" << std::endl;
     }
 }

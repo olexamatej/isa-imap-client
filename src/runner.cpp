@@ -11,7 +11,7 @@ Runner::Runner(Connection conn, File_manager file_manager)
 {
     if (conn_.encryption_ && !client_.verify_certificate())
     {
-        std::cout << "Certificate verification failed" << std::endl;
+        std::cerr << "Certificate verification failed" << std::endl;
         exit(1);
     }
 }
@@ -38,12 +38,12 @@ bool Runner::send_and_receive(const std::string& command, std::string& response)
 bool Runner::initialize_connection() {
     std::string response;
     if (!send_and_receive("", response)) {
-        std::cout << "Error: Initial connection failed" << std::endl;
+        std::cerr << "Error: Initial connection failed" << std::endl;
         return false;
     }
 
     if (response.find("* OK ") == std::string::npos) {
-        std::cout << "Error: Unexpected initial response format" << std::endl;
+        std::cerr << "Error: Unexpected initial response format" << std::endl;
         return false;
     }
 
@@ -63,8 +63,7 @@ bool Runner::initialize_connection() {
     response = to_lowercase(response);
 
     if (response.find(" select completed") == std::string::npos) {
-        std::cout << response << std::endl;
-        std::cout << "Error: Unexpected SELECT response format" << std::endl;
+        std::cerr << "Error: Unexpected SELECT response format" << std::endl;
         return false;
     }
 
@@ -92,7 +91,7 @@ bool Runner::process_single_message(int msg_id, bool headers_only) {
 
     std::string file_name = parser_.get_file_name(response);
     if(file_name.length() > 256){
-        std::cout << "Error: Could not get file name" << std::endl;
+        std::cerr << "Error: Could not get file name" << std::endl;
 }
 
     if (file_manager_.check_existence(conn_.out_dir_ + "/" + file_name)) {
@@ -150,7 +149,7 @@ void Runner::run() {
 
     std::string response;
     if (!send_and_receive(commands_.logout(tag_), response)) {
-        std::cout << "Error: Logout failed" << std::endl;
+        std::cerr << "Error: Logout failed" << std::endl;
         return;
     }
     std::cout << "Logged out" << std::endl;

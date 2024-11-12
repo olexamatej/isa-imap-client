@@ -150,7 +150,6 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
     std::string full_response;
     bool bye = false;
     bool contains_junk = false;
-    std::cout << "tag: " << tag << std::endl;
     while (true)
     {
         char buffer[10000];
@@ -170,7 +169,6 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
             {
                 // Timeout occurred
                 std::cerr << "Timeout after " << TIMEOUT << " seconds" << std::endl;
-                std::cout << full_response << std::endl;
 
                 return std::make_pair("", true);
             }
@@ -212,13 +210,11 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
         else if (full_response.rfind(tag_str + " NO") != std::string::npos)
         {
             std::cerr << "ERROR: NO responce received" << std::endl;
-            std::cout << full_response << std::endl;
             exit(1);
         }
         else if(full_response.rfind(tag_str + " BAD") != std::string::npos)
         {
             std::cerr << "ERROR: Invalid syntax" << std::endl;
-            std::cout << full_response << std::endl;
             exit(1);
         }
     }
