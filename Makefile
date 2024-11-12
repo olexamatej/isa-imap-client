@@ -34,5 +34,5 @@ clean:
 
 run:
 	make
-	./imapcl imap.centrum.sk -T -p 993 -a auth_file -o saved_emails
+	./imapcl imap.centrum.sk -a auth_file -o saved_emails
 	

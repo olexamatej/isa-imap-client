@@ -1,5 +1,8 @@
 #include "client.h"
 
+#define TIMEOUT 10
+
+
 
 // creating connection
 Client::Client(std::string ip_address, std::string port_, bool encryption_, std::string cert_file_, std::string cert_dir_)
@@ -135,62 +138,59 @@ void Client::send(std::string message)
 }
 
 // receive message
-std::pair<std::string, bool> Client::receive(int tag)
-{
+std::pair<std::string, bool> Client::receive(int tag) {
+    // Set socket timeout
+    struct timeval timeout;
+    timeout.tv_sec = TIMEOUT;
+    timeout.tv_usec = 0;
+    
+    if (setsockopt(_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+        perror("setsockopt failed");
+    }
+
     char buffer[5000];
     ssize_t bytes_received;
     std::string response;
     std::string full_response;
     bool bye = false;
 
-    while (true)
-    {
-
-        if (encryption_ == true)
-        {
+    while (true) {
+        if (encryption_) {
             bytes_received = SSL_read(ssl, buffer, sizeof(buffer));
-        }
-        else
-        {
+        } else {
             bytes_received = recv(_socket, buffer, sizeof(buffer), 0);
+        }
+
+        if (bytes_received == -1) {
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                // Timeout occurred
+                std::cerr << "Timeout after " << TIMEOUT << " seconds" << std::endl;
+                return std::make_pair("", bye);
+            }
+            perror("recv");
+            return std::make_pair("", bye);
         }
 
         response = std::string(buffer, bytes_received);
         std::string tag_str = std::to_string(tag);
         full_response += response;
 
-        //if there was also a BYE message, we need to break
-        if(response.rfind(tag_str + " OK BYE") != std::string::npos){
+        if (response.rfind(tag_str + " OK BYE") != std::string::npos) {
             bye = true;
             break;
         }
 
-        if ((response.rfind(tag_str + " OK") != std::string::npos) || (
-            response.rfind("* OK") != std::string::npos))
-        {
+        if ((response.rfind(tag_str + " OK") != std::string::npos) || 
+            (response.rfind("* OK") != std::string::npos)) {
             break;
         }
         
-        else if (response.rfind(tag_str + " NO") != std::string::npos ||
-                 response.rfind(tag_str + " BAD") != std::string::npos)
-        {
-            std::cerr << "ERROR: Problem with server_" << std::endl;
+          if (response.rfind(tag_str + " NO") != std::string::npos ||
+            response.rfind(tag_str + " BAD") != std::string::npos) {
+            std::cerr << "ERROR: Problem with server" << std::endl;
             exit(1);
         }
-        // else{
-        //     std::cout << "TOTO - " << tag_str + " OK" << std::endl;
-        // }
-
-        if (bytes_received == -1)
-        {
-            if (errno != EAGAIN && errno != EWOULDBLOCK)
-            {
-                perror("recv");
-            }
-            // Return empty string to indicate no data available
-            return std::make_pair("", bye);
-        }
     }
-    // std::cout << "Received " << bytes_received << " bytes from " << ip_address << ":" << port_ << std::endl;
+
     return std::make_pair(full_response, bye);
 }

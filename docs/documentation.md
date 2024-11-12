@@ -199,10 +199,7 @@ Na ukládanie sa používajú metódy
 Cez získané dôležité dáta z hlavičky emailu si vieme skontrolovať existenciu správy v adresári. V tejto implementácii sa súbory obsahujúce čisto hlavičku mailu označujú prefixom `H-`. Ak chceme uložiť celú správu, najprv skontrolujeme jej existenciu v adresári - v prípade jej existencie sa nebude ukladať 2x. Taktiež sa kontroluje existencia hlavičkového súboru v adresári, ak existuje tak sa vymaže a vytvorí sa súbor s celou správou, už bez prefixu `H-`.
 
 ### Prečo nepouživať UID?
-V mojej implementácii nepoužívam UID na pomenovanie súborov ale Message-ID, aj keď je to dlhšie a menej prehľadné ako UID.
-Najväčšiou nevýhodou UID považujem možné skončenie UID Validity. Toto by viedlo k potrebe stiahnuť všetky správy od znova a možnej desynchronizácii klienta so serverom.  
-Message-ID je vždy unikátne pre email odoslaný serverom, takže v kombinácii s mailom odosielateľa sa stáva spoľahlivejšiou cestou unikátneho pomenovania.
-
+V tejto implementácii nie je použitý UID na pomenovanie súborov; namiesto neho je využitý Message-ID, aj keď je dlhší a menej prehľadný. Najväčšou nevýhodou UID je možnosť skončenia UID Validity, čo by viedlo k nutnosti opätovného stiahnutia všetkých správ a potenciálnej desynchronizácii klienta so serverom. Message-ID je vždy jedinečný pre každý email odoslaný serverom, takže v kombinácii s emailom odosielateľa predstavuje spoľahlivejší spôsob unikátneho pomenovania.
 
 
 ## Testovanie
