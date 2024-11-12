@@ -63,7 +63,7 @@ void File_manager::save_mail(std::string file_name, std::string mail, std::strin
         
         if (first_newline != std::string::npos && last_newline != std::string::npos && first_newline < last_newline)
         {
-            std::string email_content = mail.substr(first_newline + 1, last_newline - first_newline - 1);
+            std::string email_content = mail.substr(first_newline + 1, last_newline - first_newline - 3);
             file << email_content;
         }
         else
