@@ -1,6 +1,6 @@
 #include "client.h"
 
-#define TIMEOUT 20
+#define TIMEOUT 10
 
 // creating connection
 Client::Client(std::string ip_address, std::string port_, bool encryption_, std::string cert_file_, std::string cert_dir_)
@@ -197,35 +197,30 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
         std::string tag_str = std::to_string(tag);
         full_response += response;
 
-        if (response.rfind(tag_str + " OK BYE") != std::string::npos)
+        if (full_response.rfind(tag_str + " OK BYE") != std::string::npos)
         {
             bye = true;
             break;
         }
 
-        if ((response.rfind(tag_str + " OK") != std::string::npos) ||
-            (response.rfind("* OK") != std::string::npos))
+        if ((full_response.rfind(tag_str + " OK") != std::string::npos) ||
+            (full_response.rfind("* OK") != std::string::npos))
         {
             break;
         }
 
-        else if (response.rfind(tag_str + " NO") != std::string::npos)
+        else if (full_response.rfind(tag_str + " NO") != std::string::npos)
         {
             std::cerr << "ERROR: NO responce received" << std::endl;
             std::cout << full_response << std::endl;
             exit(1);
         }
-        else if(response.rfind(tag_str + " BAD") != std::string::npos)
+        else if(full_response.rfind(tag_str + " BAD") != std::string::npos)
         {
             std::cerr << "ERROR: Invalid syntax" << std::endl;
             std::cout << full_response << std::endl;
             exit(1);
         }
-        else{
-            std::cout << tag_str << std::endl;
-        }
-
-
     }
 
     return std::make_pair(full_response, bye);
