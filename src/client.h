@@ -19,6 +19,7 @@ class Client {
         void send(std::string message);
         void connect();
         std::pair<std::string,bool> receive(int tag);
+        std::string simple_receive(int tag, std::string sent_command);
         void init_openssl(std::string cert_file_, std::string cert_dir_);
         bool verify_certificate();
     private:

@@ -48,6 +48,8 @@
         "cstring": "cpp",
         "fstream": "cpp",
         "cinttypes": "cpp",
-        "test": "cpp"
+        "test": "cpp",
+        "variant": "cpp",
+        "sstream": "cpp"
     }
 }

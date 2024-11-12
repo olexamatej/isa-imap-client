@@ -146,7 +146,8 @@ Ak počas sťahovania správ nedošla klientovi odpoveď typu `BAD` alebo `NO`, 
 Komunikácia so serverom je implementovaná v súboroch `client.cpp` a `client.h`. Na TCP komunikáciu sa používajú knižnice `netdb`, `sys/socket`, `sys/types`. Metódy tejto triedy sú
 - `connect` - na vytvorenie socketu a vytvorenie pripojenie so serverom
 - `send` - posielanie správ
-- `receive` - príjmanie správ, táto metóda vráti `std::pair` reťazca a bool - v prípade, že server pošle správu `BYE`, teda ukončí pripojenie tak sa bool vráti v hodnote `true`, čo naznačí programu aby ukončil spojenie a neposielal ďalšie správy. Táto funkcia cyklicky čaká na koniec správy (pod reťazcom OK/NO/BAD), ale je implementovaný timeout ktorý ukončí čakanie predčasne aby nedošlo k úplnému zaseknutiu.
+- `receive` - príjmanie správ, táto metóda vráti `std::pair` reťazca a bool - v prípade, že server pošle správu `BYE`, teda ukončí pripojenie tak sa bool vráti v hodnote `true`, čo naznačí programu aby ukončil spojenie a neposielal ďalšie správy. Táto funkcia cyklicky čaká na koniec správy (pod reťazcom OK/NO/BAD), ale je implementovaný timeout ktorý ukončí čakanie predčasne aby nedošlo k úplnému zaseknutiu. 
+<!-- `receive` taktiež kontroluje obsah správy - ak správa nieje alfanumerická, nemá medzeri alebo `\r` či `\n`, označí sa ako "junk" a program sa ukončí. -->
 
 
 ### Šifrovanie SSL

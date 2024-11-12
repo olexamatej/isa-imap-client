@@ -18,12 +18,13 @@ Runner::Runner(Connection conn, File_manager file_manager)
 
 bool Runner::send_and_receive(const std::string& command, std::string& response) {
     client_.send(command);
+
     auto result = client_.receive(tag_);
+
     response = result.first;
     bool bye = result.second;
     tag_++;
     if(bye){
-        std::cout << "Server has ended connection" << std::endl;
         return false;
     }
     return true;
@@ -35,21 +36,33 @@ bool Runner::initialize_connection() {
         std::cout << "Error: Initial connection failed" << std::endl;
         return false;
     }
-    std::cout << response;
+
+    if (response.find("* OK ") == std::string::npos) {
+        std::cout << "Error: Unexpected initial response format" << std::endl;
+        return false;
+    }
 
     if (!send_and_receive(commands_.login(tag_, conn_.user_name_, conn_.user_password_), response)) {
         return false;
     }
+
     parser_.get_capability(response);
 
     if (!send_and_receive(commands_.select(tag_, conn_.inbox_), response)) {
         return false;
     }
+    if (response.find(" SELECT completed") == std::string::npos) {
+        std::cout << response << std::endl;
+        std::cout << "Error: Unexpected SELECT response format" << std::endl;
+        return false;
+    }
+
     parser_.get_message_count(response);
     std::cout << "Message count: " << parser_.message_count_ << std::endl;
     
     return true;
 }
+
 
 bool Runner::fetch_new_messages(std::vector<int>& new_messages) {
     std::string response;
@@ -103,7 +116,6 @@ void Runner::run() {
     if (!initialize_connection()) {
         return;
     }
-
     std::vector<int> messages_to_process;
     
     if (conn_.only_new_messages_) {
