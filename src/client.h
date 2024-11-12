@@ -1,5 +1,4 @@
-#ifndef TCP_CLIENT_H
-#define TCP_CLIENT_H
+#pragma once
 
 #include <iostream>
 #include <cstring>
@@ -20,7 +19,6 @@ class Client {
         void send(std::string message);
         void connect();
         std::pair<std::string,bool> receive(int tag);
-        void receiveTimeout(int){};
         void init_openssl(std::string cert_file_, std::string cert_dir_);
         bool verify_certificate();
     private:
@@ -35,4 +33,3 @@ class Client {
 };
 
 
-#endif

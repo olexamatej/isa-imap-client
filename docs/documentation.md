@@ -137,15 +137,71 @@ Nakoniec sa vytvorí objekt triedy `runner`, ktorý využíva dáta získané z 
 `Runner` je trieda ktorá slúži pre hlavný beh programu. V jej konštruktore sa vytvárajú inštancie tried `Client`, `Commands` a `MsgParser`. Metóda `run` tieto objekty využíva a volá ich metódy pre implementovanie funkcionality IMAP klientu.   
 Na začiatku sa vytvóri spojenie pomocou `initialize_connection`, ktorá najprv pošle prázdnu správu serveru, potom pošle údaje na prihlásenie, získa možnosti serveru, vyberie schránku a získa počet správ.  
 Následne sa podľa zadaných argumentov rozhodne, či bude získavať iba nové správy pomocou `fetch_new_messages` alebo všetky, Podľa toho si uloží dáta do vektoru `messages_to_process`. Nakoniec sa zavolá metóda `process_messages`, ktorá na ID každej uloženej správy zavolá `process_single_message` a tá skontroluje existenciu jednotlivých správ - v prípade že neexistujú, tak sú stiahnuté a uložené do adresára.  
-Ak počas sťahovania správ nedošla klientovi odpoveď typu `BAD` alebo `NO`, považuje sa beh za úspešný a nakoniec sa odošle iba príkaz `logout`. 
+Ak počas sťahovania správ nedošla klientovi odpoveď typu `BAD` alebo `NO`, považuje sa beh za úspešný a nakoniec sa odošle iba príkaz `logout`.  
+`Runner` na komunikáciu so serverom používa metódu `send_and_receive` - táto metóda slúži na jednotné poslanie a prijatie správy - pretože každá poslaná správa čaká na odpoveď. Taktiež je to spôsob ktorým sa spravujú tagy.
 
 
 ### Komunikácia so serverom
 
+Komunikácia so serverom je implementovaná v súboroch `client.cpp` a `client.h`. Na TCP komunikáciu sa používajú knižnice `netdb`, `sys/socket`, `sys/types`. Metódy tejto triedy sú
+- `connect` - na vytvorenie socketu a vytvorenie pripojenie so serverom
+- `send` - posielanie správ
+- `receive` - príjmanie správ, táto metóda vráti `std::pair` reťazca a bool - v prípade, že server pošle správu `BYE`, teda ukončí pripojenie tak sa bool vráti v hodnote `true`, čo naznačí programu aby ukončil spojenie a neposielal ďalšie správy. Táto funkcia cyklicky čaká na koniec správy (pod reťazcom OK/NO/BAD), ale je implementovaný timeout ktorý ukončí čakanie predčasne aby nedošlo k úplnému zaseknutiu.
+
+
+### Šifrovanie SSL
+
+Enkrypcia komunikácie je implementovaná v rovnakých súboroch ako aj komunikácia so serverom - `client.cpp` a `client.h`. Použivajú sa na to knižnice `openssl/ssl`, `openssl/err`.
+Metódy implementujúce šifrovanie sú
+- `init_openssl` - inicializuje šifrovanie, pridá šifrovacie algoritmy, načíta správy pre errory, vytvorí SSL kontext pre TLS pripojenie a načíta verifikáciu certifikátov
+- `verify_certificate` - získa certifikát od serveru, ktorý následne verifikuje a v prípade neúspechu vypíše chybovú hlášku
+
+Okrem iného sa v metódach triedy `Client` kontroluje príznak ktorý rozhoduje o šifrovanej komunikácii a volá potrebné metódy knižníc a pomocných metód. 
+V prípade šifrovanej komunikácie sa pre posielanie a príjmanie správ používajú rovnaké metódy z triedy `Client`, avšak namiesto funkcií `::send` a `::receive` sa používa `SSL_write` a `SSL_read`.
+
 ### Posielanie príkazov
+
+Príkazy posielané na server sú implementované v triede `Commands`, ktorá má metódy na každý potrebný príkaz.
+
+- `login`
+- `logout`
+- `list`
+- `select`
+- `fetch_header_important`
+- `fetch_header`
+- `fetch`
+- `get_new_messages`
+
+Tieto metódy vezmú parametre `tag` a informácie špecifické pre daný príkaz a vrátia reťazec príkazu v RFC3501 formáte.
+Dôležitou metódou je `fetch_header_important`, ktorý pomocou `PEEK` získa zo správy informácie ktoré sa používajú na pomenovanie správ - predmet, dátum, odosielateľa a message id. Tieto správy sa používajú na pomenovanie uložených správ. Táto kombinácia informácii nám zaručí unikátnosť názvov a zároveň nám zaručí prehľadnosť v priečinku.
+
 
 ### Spracovavanie správ
 
+Reťazce prijaté po odoslaní príkazu na server sú spracované metódami triedy `MsgParser`. Tieto metódy slúžia hlavne na extrakciu dôležitých dát ako napr. ID nových správ.
+
+- `get_message_count` - získa počet správ zo schránky
+- `get_new_messages` - vráti vektor prvkov typu integer s hodnotami ID všetkých nových správ
+- `get_capability` - do vektora s prvkami typu string vloží všetky `capabilities` serveru
+- `get_mailbox_names` - do vektora s prvkami typu string vloží všetky názvy schránok mailu
+- `extract_header_field` - z hlavičky emailu získa dáta konkrétneho poľa, napr. subject
+- `get_file_name` - z hlavičky mailu vezme odosielateľa, dátum, predmet a message id ktoré vráti ako reťazec - tento reťazec sa používa ako názov súboru do ktorého sa mail následne ukláda
+
+### Ukladanie mailov
+
+Ukladanie prijatých správ je implementované v triede `File_manager`. Táto trieda manažuje súbory a pomocou metódy `get_auth_data` vie získať autentifikačne dáta, ale používa sa aj na ukládanie správ.
+Na ukládanie sa používajú metódy
+
+- `save_mail`
+- `check_existence`
+- `remove_file`
+
+Cez získané dôležité dáta z hlavičky emailu si vieme skontrolovať existenciu správy v adresári. V tejto implementácii sa súbory obsahujúce čisto hlavičku mailu označujú prefixom `H-`. Ak chceme uložiť celú správu, najprv skontrolujeme jej existenciu v adresári - v prípade jej existencie sa nebude ukladať 2x. Taktiež sa kontroluje existencia hlavičkového súboru v adresári, ak existuje tak sa vymaže a vytvorí sa súbor s celou správou, už bez prefixu `H-`.
+
+### Prečo nepouživať UID?
+V mojej implementácii nepoužívam UID na pomenovanie súborov ale Message-ID, aj keď je to dlhšie a menej prehľadné ako UID.
+Najväčšiou nevýhodou UID považujem možné skončenie UID Validity. Toto by viedlo k potrebe stiahnuť všetky správy od znova a možnej desynchronizácii klienta so serverom.  
+Message-ID je vždy unikátne pre email odoslaný serverom, takže v kombinácii s mailom odosielateľa sa stáva spoľahlivejšiou cestou unikátneho pomenovania.
 
 
 
@@ -153,4 +209,3 @@ Ak počas sťahovania správ nedošla klientovi odpoveď typu `BAD` alebo `NO`, 
 
 ## Sources
 
-[1] [IPK24Chat Protocol](https://git.fit.vutbr.cz/NESFIT/IPK-Projects-2024/src/branch/master#developer-environment-and-virtualization-remarks)
