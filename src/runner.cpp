@@ -1,4 +1,5 @@
 #include "runner.h"
+#include <algorithm>
 
 Runner::Runner(Connection conn, File_manager file_manager) 
     : conn_(conn)
@@ -15,6 +16,10 @@ Runner::Runner(Connection conn, File_manager file_manager)
     }
 }
 
+std::string to_lowercase(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
 
 bool Runner::send_and_receive(const std::string& command, std::string& response) {
     client_.send(command);
@@ -48,17 +53,22 @@ bool Runner::initialize_connection() {
 
     parser_.get_capability(response);
 
+    
+    std::string reference = ""; // Set the reference as needed
+    std::string mailbox = "*"; // Set the mailbox as needed
+
     if (!send_and_receive(commands_.select(tag_, conn_.inbox_), response)) {
         return false;
     }
-    if (response.find(" SELECT completed") == std::string::npos) {
+    response = to_lowercase(response);
+
+    if (response.find(" select completed") == std::string::npos) {
         std::cout << response << std::endl;
         std::cout << "Error: Unexpected SELECT response format" << std::endl;
         return false;
     }
 
     parser_.get_message_count(response);
-    std::cout << "Message count: " << parser_.message_count_ << std::endl;
     
     return true;
 }
@@ -81,6 +91,10 @@ bool Runner::process_single_message(int msg_id, bool headers_only) {
     }
 
     std::string file_name = parser_.get_file_name(response);
+    if(file_name.length() > 256){
+        std::cout << "Error: Could not get file name" << std::endl;
+}
+
     if (file_manager_.check_existence(conn_.out_dir_ + "/" + file_name)) {
         return true;  // Skip existing files
     }

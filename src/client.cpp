@@ -209,12 +209,19 @@ std::pair<std::string, bool> Client::receive(int tag)
             break;
         }
 
-        if (response.rfind(tag_str + " NO") != std::string::npos ||
-            response.rfind(tag_str + " BAD") != std::string::npos)
+        else if (response.rfind(tag_str + " NO") != std::string::npos)
         {
-            std::cerr << "ERROR: Problem with server" << std::endl;
+            std::cerr << "ERROR: NO responce received" << std::endl;
+            std::cout << full_response << std::endl;
             exit(1);
         }
+        else if(response.rfind("BAD") != std::string::npos)
+        {
+            std::cerr << "ERROR: Invalid syntax" << std::endl;
+            exit(1);
+        }
+
+
     }
 
     return std::make_pair(full_response, bye);

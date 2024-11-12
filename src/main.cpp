@@ -9,7 +9,6 @@ int main(int argc, char *argv[])
 {   
     Connection conn = parse_arg(argc, argv);
 
-
     File_manager fm = File_manager();
     fm.get_auth_data(&conn, conn.auth_file_);
     Runner runner(conn, fm);

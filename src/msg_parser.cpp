@@ -1,13 +1,22 @@
 #include "msg_parser.h"
 
-void MsgParser::get_message_count(const std::string response)
-{
-    std::string::size_type pos = response.find("EXISTS");
-    if (pos != std::string::npos)
-    {
-        this->message_count_= response[2] - '0';
+void MsgParser::get_message_count(const std::string response) {
+    std::string::size_type pos = response.find("exists");
+    if (pos != std::string::npos) {
+        std::string::size_type start = 0;
+        std::string::size_type end = pos;
+        while (end > start && isdigit(response[end - 2])) {
+            end--;
+        }
+        std::string message_count_str = response.substr(end - 1, pos - end);
+
+        this->message_count_ = std::stoi(message_count_str);
+    } else {
+        this->message_count_ = 0; // If "exists" is not found, set message_count_ to 0
     }
+    std::cout << "Message count: " << this->message_count_ << std::endl;
 }
+
 
 std::vector<int> MsgParser::get_new_messages(const std::string response)
 {

@@ -34,7 +34,7 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
     }
     else
     {
-        std::cout << "Error opening file" << std::endl;
+        std::cout << "Error opening file when getting data" << std::endl;
     }
 
     file.close();
@@ -45,6 +45,8 @@ void File_manager::save_mail(std::string file_name, std::string mail, std::strin
 {
     std::ofstream file(out_dir_ + "/" + file_name);
     
+    
+
     if (file.is_open())
     {   
         size_t first_newline = mail.find('\n');

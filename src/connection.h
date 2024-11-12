@@ -28,7 +28,7 @@ class Connection{
         std::string cert_file_;
         bool only_new_messages_;
         bool only_message_headers_;
-        std::string inbox_ = "inbox";
+        std::string inbox_ = "INBOX";
 
         std::string user_name_ = "";
         std::string user_password_ = "";
