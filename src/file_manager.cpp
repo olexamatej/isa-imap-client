@@ -44,9 +44,14 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
 void File_manager::save_mail(std::string file_name, std::string mail, std::string out_dir_)
 {
     std::ofstream file(out_dir_ + "/" + file_name);
-    
-    
+    if(file_name.length() > 256){
+        std::cout << "Error: Could not get file name" << std::endl;
+    }
+    else if(file_name.find('/') != std::string::npos){
+        std::cout << "Error: Invalid file name" << std::endl;
+    }
 
+    else{
     if (file.is_open())
     {   
         size_t first_newline = mail.find('\n');
@@ -71,6 +76,7 @@ void File_manager::save_mail(std::string file_name, std::string mail, std::strin
         std::cout << "Error opening file" << std::endl;
     }
     file.close();
+    }
 }
 
 bool File_manager::check_existence(std::string file_name)

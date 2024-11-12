@@ -218,6 +218,7 @@ std::pair<std::string, bool> Client::receive(int tag)
         else if(response.rfind("BAD") != std::string::npos)
         {
             std::cerr << "ERROR: Invalid syntax" << std::endl;
+            std::cout << full_response << std::endl;
             exit(1);
         }
 

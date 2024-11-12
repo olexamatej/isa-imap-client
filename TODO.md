@@ -12,3 +12,6 @@ add better checking of messages - atleast at the start
 remove () from end of messages
 
 cant even fetch all data from eva
+
+perhaps look for ) at the end of message, if there is tag completed then go next
+

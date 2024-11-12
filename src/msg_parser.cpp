@@ -1,22 +1,28 @@
 #include "msg_parser.h"
+#include <unordered_set>
+#include <algorithm>
 
-void MsgParser::get_message_count(const std::string response) {
+void MsgParser::get_message_count(const std::string response)
+{
     std::string::size_type pos = response.find("exists");
-    if (pos != std::string::npos) {
+    if (pos != std::string::npos)
+    {
         std::string::size_type start = 0;
         std::string::size_type end = pos;
-        while (end > start && isdigit(response[end - 2])) {
+        while (end > start && isdigit(response[end - 2]))
+        {
             end--;
         }
         std::string message_count_str = response.substr(end - 1, pos - end);
 
         this->message_count_ = std::stoi(message_count_str);
-    } else {
+    }
+    else
+    {
         this->message_count_ = 0; // If "exists" is not found, set message_count_ to 0
     }
     std::cout << "Message count: " << this->message_count_ << std::endl;
 }
-
 
 std::vector<int> MsgParser::get_new_messages(const std::string response)
 {
@@ -60,7 +66,6 @@ std::vector<int> MsgParser::get_new_messages(const std::string response)
     }
     return new_messages_;
 }
-
 
 void MsgParser::get_capability(const std::string response)
 {
@@ -147,7 +152,7 @@ std::string MsgParser::extract_header_field(const std::string header, const std:
 // gets date, from, subject and message id
 std::string MsgParser::get_file_name(std::string response)
 {
-    
+
     std::string date = extract_header_field(response, "Date: ");
 
     if (!date.empty())
@@ -184,7 +189,6 @@ std::string MsgParser::get_file_name(std::string response)
     }
 
     std::string subject = extract_header_field(response, "Subject: ");
-    
 
     std::string message_id = extract_header_field(response, "Message-ID: ");
     if (!message_id.empty())
@@ -195,7 +199,27 @@ std::string MsgParser::get_file_name(std::string response)
         }
     }
 
- 
     std::string file_name = from + "-" + date + "-" + subject + "-" + message_id + ".eml";
+
+    // TODO FIND BETTER FIX
+
+    static const std::unordered_set<char> forbiddenChars = {'/', '\\', ':', '*', '?', '"', '<', '>', '|'};
+    std::string cleanedFileName;
+
+    for (char c : file_name)
+    {
+        if (forbiddenChars.count(c) == 0)
+        {
+            cleanedFileName += c;
+        }
+    }
+
+    file_name = cleanedFileName;
+    
+    // TODO FIND BETTER FIX
+    if (file_name.length() > 250)
+    {
+        file_name = file_name.substr(0, 250);
+    }
     return file_name;
 }
