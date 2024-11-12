@@ -1,6 +1,6 @@
 #include "client.h"
 
-#define TIMEOUT 10
+#define TIMEOUT 20
 
 // creating connection
 Client::Client(std::string ip_address, std::string port_, bool encryption_, std::string cert_file_, std::string cert_dir_)
@@ -135,7 +135,7 @@ void Client::send(std::string message)
 }
 
 // receive message
-std::pair<std::string, bool> Client::receive(int tag)
+std::pair<std::string, bool> Client::receive(uint64_t tag)
 {
     // Set socket timeout
     struct timeval timeout;
@@ -150,10 +150,10 @@ std::pair<std::string, bool> Client::receive(int tag)
     std::string full_response;
     bool bye = false;
     bool contains_junk = false;
-
+    std::cout << "tag: " << tag << std::endl;
     while (true)
     {
-        char buffer[5000];
+        char buffer[10000];
         ssize_t bytes_received;
         if (encryption_)
         {
@@ -215,11 +215,14 @@ std::pair<std::string, bool> Client::receive(int tag)
             std::cout << full_response << std::endl;
             exit(1);
         }
-        else if(response.rfind("BAD") != std::string::npos)
+        else if(response.rfind(tag_str + " BAD") != std::string::npos)
         {
             std::cerr << "ERROR: Invalid syntax" << std::endl;
             std::cout << full_response << std::endl;
             exit(1);
+        }
+        else{
+            std::cout << tag_str << std::endl;
         }
 
 

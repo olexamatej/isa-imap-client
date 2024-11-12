@@ -22,5 +22,5 @@ private:
     Client client_;
     Commands commands_;
     MsgParser parser_;
-    int tag_;
+    uint64_t tag_ = 120;
 };

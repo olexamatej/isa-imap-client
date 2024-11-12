@@ -7,7 +7,7 @@ Runner::Runner(Connection conn, File_manager file_manager)
     , client_(conn.server_, conn.port_, conn.encryption_, conn.cert_file_, conn.cert_dir_)
     , commands_()
     , parser_()
-    , tag_(1) 
+    
 {
     if (conn_.encryption_ && !client_.verify_certificate())
     {
