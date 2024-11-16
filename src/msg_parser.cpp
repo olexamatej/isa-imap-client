@@ -152,9 +152,7 @@ std::string MsgParser::extract_header_field(const std::string header, const std:
 // gets date, from, subject and message id
 std::string MsgParser::get_file_name(std::string response)
 {
-
     std::string date = extract_header_field(response, "Date: ");
-
     if (!date.empty())
     {
         for (long unsigned int i = 0; i < date.length(); i++)
@@ -190,7 +188,10 @@ std::string MsgParser::get_file_name(std::string response)
 
     std::string subject = extract_header_field(response, "Subject: ");
 
-    std::string message_id = extract_header_field(response, "Message-ID: ");
+    std::string message_id = extract_header_field(response, "Message-Id: ");
+    if(message_id.empty()){
+        message_id = extract_header_field(response, "Message-ID: ");
+    }
     if (!message_id.empty())
     {
         if (message_id[0] == '<')
@@ -198,13 +199,11 @@ std::string MsgParser::get_file_name(std::string response)
             message_id = message_id.substr(1, message_id.length() - 2);
         }
     }
-
-    std::string file_name = from + "-" + date + "-" + subject + "-" + message_id + ".eml";
-
-    // TODO FIND BETTER FIX
-
+    
     static const std::unordered_set<char> forbiddenChars = {'/', '\\', ':', '*', '?', '"', '<', '>', '|'};
     std::string cleanedFileName;
+    std::string file_name = from + "-" + date + "-" + subject + "-" + message_id;
+
 
     for (char c : file_name)
     {
@@ -216,10 +215,12 @@ std::string MsgParser::get_file_name(std::string response)
 
     file_name = cleanedFileName;
     
-    // TODO FIND BETTER FIX
     if (file_name.length() > 250)
     {
         file_name = file_name.substr(0, 250);
     }
+    
+
+    file_name.append(".eml");
     return file_name;
 }

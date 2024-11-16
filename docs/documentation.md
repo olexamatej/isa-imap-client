@@ -209,19 +209,21 @@ Na ukládanie sa používajú metódy
 - `check_existence`
 - `remove_file`
 
-Cez získané dôležité dáta z hlavičky emailu si vieme skontrolovať existenciu správy v adresári. V tejto implementácii sa súbory obsahujúce čisto hlavičku mailu označujú prefixom `H-`. Ak chceme uložiť celú správu, najprv skontrolujeme jej existenciu v adresári - v prípade jej existencie sa nebude ukladať 2x. Taktiež sa kontroluje existencia hlavičkového súboru v adresári, ak existuje tak sa vymaže a vytvorí sa súbor s celou správou, už bez prefixu `H-`.
+Cez získané dôležité dáta z hlavičky emailu si vieme skontrolovať existenciu správy v adresári. V tejto implementácii sa súbory obsahujúce čisto hlavičku mailu označujú prefixom `H-`. Ak chceme uložiť celú správu, najprv skontrolujeme jej existenciu v adresári - v prípade jej existencie sa nebude ukladať 2x. Taktiež sa kontroluje existencia hlavičkového súboru v adresári, ak existuje tak sa vymaže a vytvorí sa súbor s celou správou, už bez prefixu `H-`. Meno emailu je ale obmedzene počtom znakov na 250, kvôli limitáciam dĺžky názvy súboru linuxu.
 
 ### Prečo nepouživať UID?
-V tejto implementácii nie je použitý UID na pomenovanie súborov; namiesto neho je využitý Message-ID, aj keď je dlhší a menej prehľadný. Najväčšou nevýhodou UID je možnosť skončenia UID Validity, čo by viedlo k nutnosti opätovného stiahnutia všetkých správ a potenciálnej desynchronizácii klienta so serverom. Message-ID je vždy jedinečný pre každý email odoslaný serverom, takže v kombinácii s emailom odosielateľa predstavuje spoľahlivejší spôsob unikátneho pomenovania.
+V tejto implementácii nie je použitý UID na pomenovanie súborov; namiesto neho je využitý Message-ID, aj keď je dlhší a menej prehľadný. Najväčšou nevýhodou UID je možnosť skončenia UID Validity, čo by viedlo k nutnosti opätovného stiahnutia všetkých správ a potenciálnej desynchronizácii klienta so serverom. Message-ID je vždy jedinečný pre každý email odoslaný daným serverom, takže v kombinácii s emailom odosielateľa predstavuje spoľahlivejší spôsob unikátneho pomenovania.
 
 ### Nové správy
 
-NEW vs UNSEEN
+Program pri získavaní nových správ používa parameter `NEW`. Ďalšie varianty mohli byť `UNSEEN` alebo `RECENT`, ale pri testovaní sa ako najspoľahlivejší ukázal `NEW` - stiahol najväčší počet potenciálne chcených správ.
 
 
 ## Testovanie
 
-Klient bol predovšetkým testovaný na serveri `imap.centrum.sk` cez poskytovateľa `pobox.sk`. Tu bol vytvorený email na ktorý boli posielané správy. `imap.centrum.sk` poskytuje možnosť pripojenia bez TLS - takže bol ideálny pre túto implementáciu. Komunikácia bola sledovaná cez `wireshark` - toto umožnilo správne otestovanie TLS. Na otestovanie konečnej implementácie bol na základe zadania použitý server `eva.fit.vutbr.cz`, na ktorom sa počas štúdia nahromadilo ~1500 správ. Schnopnosť tohto programu správne stiahnuť všetky správy (otestované aj na serveri `merlin` bez nájdených chýb pomocou programu `valgrind`) ukázala jeho výslednú funkcionalitu a spoľahlivosť.  
+Klient bol predovšetkým testovaný na serveri `imap.centrum.sk` cez poskytovateľa `pobox.sk`. Tu bol vytvorený email na ktorý boli posielané správy. `imap.centrum.sk` poskytuje možnosť pripojenia bez TLS - takže bol ideálny pre túto implementáciu. Komunikácia bola sledovaná cez `wireshark` - toto umožnilo správne otestovanie TLS. Na otestovanie konečnej implementácie bol na základe zadania použitý server `eva.fit.vutbr.cz`, na ktorom sa počas štúdia nahromadilo ~1500 správ (pri prihlásení na xolexa03 účet). Schnopnosť tohto programu správne stiahnuť všetky správy (otestované aj na serveri `merlin` bez nájdených chýb pomocou programu `valgrind`) ukázala jeho výslednú funkcionalitu a spoľahlivosť.  
+
+Stiahnuté súbory vo formáte .eml boli otestované otvorením v programe microsoft outlook - čím sa otestovala správnosť zapisovania.  
 
 Okrem iného boli použité aj mockup testy, viz. `mockup.py`. Tento program, spustený pomocou `python mockup.py` spojazdní mockup server na porte 3143 a je schopný 6 scénarií.
 
@@ -236,9 +238,9 @@ Všetky varianty je možné otestovať pomocou
 `python mockup.py`  
 `./imapcl localhost -p 3143 -o <mail directory> -a <authentification file>`  
 
+Program od uživateľa bude vyžadovať číslo scenária.
 Týmto spôsobom boli vyskúšané a odhalené možné chyby.
 
 
 ## Zdroje
-
 
