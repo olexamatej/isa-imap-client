@@ -157,7 +157,7 @@ std::string MsgParser::get_file_name(std::string response)
 
     if (!date.empty())
     {
-        for (int i = 0; i < date.length(); i++)
+        for (long unsigned int i = 0; i < date.length(); i++)
         {
             if (date[i] == ' ')
             {

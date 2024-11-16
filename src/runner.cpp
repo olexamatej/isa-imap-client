@@ -95,6 +95,7 @@ bool Runner::process_single_message(int msg_id, bool headers_only) {
 }
 
     if (file_manager_.check_existence(conn_.out_dir_ + "/" + file_name)) {
+        std::cout << "this file exists";
         return true;  // Skip existing files
     }
 

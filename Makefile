@@ -1,7 +1,7 @@
 # Compiler
 CC := g++
 # Compiler flags
-CFLAGS := -std=c++2a -g 
+CFLAGS := -std=c++2a -g
 
 LDFLAGS= -pthread -lssl -lcrypto
 
@@ -35,4 +35,6 @@ clean:
 run:
 	make
 	./imapcl imap.centrum.sk -p 143 -a auth_file -o saved_emails
-	
+
+tar:
+	tar -cvf xolexa03.tar $(wildcard Makefile *.pdf *.py README) src/

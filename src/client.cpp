@@ -1,6 +1,6 @@
 #include "client.h"
 
-#define TIMEOUT 10
+#define TIMEOUT 15
 
 // creating connection
 Client::Client(std::string ip_address, std::string port_, bool encryption_, std::string cert_file_, std::string cert_dir_)
@@ -150,7 +150,6 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
 
     std::string full_response;
     bool bye = false;
-    bool contains_junk = false;
     while (true)
     {
         char buffer[10000];

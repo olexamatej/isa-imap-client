@@ -1,12 +1,23 @@
 # IMAP Client ISA
 
-Matej Olexa (xolexa03) 13.11.2024
+Matej Olexa (xolexa03) 16.11.2024
 
 ## Obsah
 
 [Popis](#popis)  
 [Spustenie](#Spustenie)  
 [Zoznam odovzdaných súborov](#Zoznam-odovzdaných-súborov)
+[Teória](#Teória)  
+[Implementácia](#Implementácia)  
+[Komunikácia so serverom](#Komunikácia-so-serverom)  
+[Šifrovanie SSL](#Šifrovanie-SSL)  
+[Posielanie príkazov](#Posielanie-príkazov)  
+[Spracovavanie správ](#Spracovavanie-správ)  
+[Ukladanie mailov](#Ukladanie-mailov)  
+[Prečo nepouživať UID?](#Prečo-nepouživať-UID)  
+[Nové správy](#Nové-správy)  
+[Testovanie](#Testovanie)  
+[Zdroje](#Zdroje)
 
 ## Popis
 
@@ -33,6 +44,7 @@ Implementácia IMAP klienta ktorý pomocou protokolu RFC3501 umožňuje sťahova
 - `-b <MAILBOX>`
 
 `./imapcl imap.centrum.sk -T -p 993 -a auth_file -o saved_emails`
+
 
 ## Zoznam odovzdaných súborov
 
@@ -147,7 +159,7 @@ Komunikácia so serverom je implementovaná v súboroch `client.cpp` a `client.h
 - `connect` - na vytvorenie socketu a vytvorenie pripojenie so serverom
 - `send` - posielanie správ
 - `receive` - príjmanie správ, táto metóda vráti `std::pair` reťazca a bool - v prípade, že server pošle správu `BYE`, teda ukončí pripojenie tak sa bool vráti v hodnote `true`, čo naznačí programu aby ukončil spojenie a neposielal ďalšie správy. Táto funkcia cyklicky čaká na koniec správy (pod reťazcom OK/NO/BAD), ale je implementovaný timeout ktorý ukončí čakanie predčasne aby nedošlo k úplnému zaseknutiu. 
-<!-- `receive` taktiež kontroluje obsah správy - ak správa nieje alfanumerická, nemá medzeri alebo `\r` či `\n`, označí sa ako "junk" a program sa ukončí. -->
+Dôležitý je `TIMEOUT` - nastavený na 15 sekund. Ak od serveru nepríde do 15 sekúnd odpoveď obsahujúca `OK/BAD/NO` (so správnym tagom), tak sa program ukončí.
 
 
 ### Šifrovanie SSL
@@ -202,8 +214,31 @@ Cez získané dôležité dáta z hlavičky emailu si vieme skontrolovať existe
 ### Prečo nepouživať UID?
 V tejto implementácii nie je použitý UID na pomenovanie súborov; namiesto neho je využitý Message-ID, aj keď je dlhší a menej prehľadný. Najväčšou nevýhodou UID je možnosť skončenia UID Validity, čo by viedlo k nutnosti opätovného stiahnutia všetkých správ a potenciálnej desynchronizácii klienta so serverom. Message-ID je vždy jedinečný pre každý email odoslaný serverom, takže v kombinácii s emailom odosielateľa predstavuje spoľahlivejší spôsob unikátneho pomenovania.
 
+### Nové správy
+
+NEW vs UNSEEN
+
 
 ## Testovanie
 
-## Sources
+Klient bol predovšetkým testovaný na serveri `imap.centrum.sk` cez poskytovateľa `pobox.sk`. Tu bol vytvorený email na ktorý boli posielané správy. `imap.centrum.sk` poskytuje možnosť pripojenia bez TLS - takže bol ideálny pre túto implementáciu. Komunikácia bola sledovaná cez `wireshark` - toto umožnilo správne otestovanie TLS. Na otestovanie konečnej implementácie bol na základe zadania použitý server `eva.fit.vutbr.cz`, na ktorom sa počas štúdia nahromadilo ~1500 správ. Schnopnosť tohto programu správne stiahnuť všetky správy (otestované aj na serveri `merlin` bez nájdených chýb pomocou programu `valgrind`) ukázala jeho výslednú funkcionalitu a spoľahlivosť.  
+
+Okrem iného boli použité aj mockup testy, viz. `mockup.py`. Tento program, spustený pomocou `python mockup.py` spojazdní mockup server na porte 3143 a je schopný 6 scénarií.
+
+- `Happy path` - správne spravanie serveru
+- `Corrupt message` - pošle nesprávnu správu, klient správne vyhodí chybovú hlášku
+- `Server disconnect` - server ukončí spojenie hneď na začiatku
+- `Slow response` - server má oneskorenie 2 sekundy
+- `Auth failure` - server nepríjme prihlásenie (pomocou `NO`)
+- `Malformed response` - server odošle správu bez správneho formátovania
+
+Všetky varianty je možné otestovať pomocou 
+`python mockup.py`  
+`./imapcl localhost -p 3143 -o <mail directory> -a <authentification file>`  
+
+Týmto spôsobom boli vyskúšané a odhalené možné chyby.
+
+
+## Zdroje
+
 

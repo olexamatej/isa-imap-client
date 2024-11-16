@@ -57,8 +57,7 @@ class MockIMAPServer:
             elif self.test_scenario == TestScenario.CORRUPT_MESSAGE:
                 response = response[:-5] + "CORRUPTED\r\n"
             elif self.test_scenario == TestScenario.MALFORMED_RESPONSE:
-                response = response.replace("OK ", "OK") + "MALFORMED"
-
+                response = response.replace("OK ", "OK")
             client_socket.send(response.encode('utf-8'))
 
             if self.test_scenario == TestScenario.SERVER_DISCONNECT:
