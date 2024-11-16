@@ -1,6 +1,6 @@
-# IMAP Client ISA
+# Klient IMAP s podporou TLS
 
-Matej Olexa (xolexa03) 16.11.2024
+#### Matej Olexa (xolexa03) 16.11.2024
 
 ## Obsah
 
@@ -21,54 +21,59 @@ Matej Olexa (xolexa03) 16.11.2024
 
 ## Popis
 
-Implementácia IMAP klienta ktorý pomocou protokolu RFC3501 umožňuje sťahovanie správ uložených na serveri. Po spustení sa klient autentifikuje, pomocou vybraných argumentov stiahne potrebné správy do vybraného adresára a preruší spojenie.
+Implementácia IMAP klienta ktorý pomocou protokolu RFC3501 [5] umožňuje sťahovanie správ uložených na serveri. Po spustení sa klient autentifikuje, pomocou vybraných argumentov stiahne potrebné správy do vybraného adresára a preruší spojenie.
 
 ## Spustenie
 
-`imapcl server_ [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth_file [-b MAILBOX] -o out_dir`
+`imapcl <server> [-p port] [-T [-c certfile] [-C certaddr]] [-n] [-h] -a auth_file [-b MAILBOX] -o out_dir`
 
-##### Povinné argumenty
+#### Povinné argumenty
 
-- `server`
-- `-a <auth_file>`
-- `-o <outdir>`
+- `<server>`  
+- `-a <auth_file>` - súbor s autentifikáčnymi údajmi
+- `-o <outdir>` - priečinok na uloženie mailov
 
-##### Nepovinné argumenty
+#### Nepovinné argumenty
 
 - `-p <port>`
-- `-T`
-- `-c <certfile>`
-- `-C <certaddr>`
-- `-n`
-- `-h`
-- `-b <MAILBOX>`
+- `-T` - zapnutie šifrovania
+- `-c <certfile>` - súbor s certifikátom
+- `-C <certaddr>` - adresár s certifikátmi
+- `-n` - iba maili typu `NEW`
+- `-h` - iba hlavičky mailov
+- `-b <MAILBOX>` - schránka
 
 `./imapcl imap.centrum.sk -T -p 993 -a auth_file -o saved_emails`
 
 
 ## Zoznam odovzdaných súborov
 
-- `arg_parser.cpp`
-- `arg_pasrer.h`
-- `client.cpp`
-- `client.h`
-- `commands.cpp`
-- `commands.h`
-- `connection.cpp`
-- `connection.h`
-- `file_manager.cpp`
-- `file_manager.h`
-- `main.cpp`
-- `msg_parser.cpp`
-- `msg_parser.h`
-- `runner.cpp`
-- `runner.h`
+- `Makefile`
+- `mockup.py`
+- `README`
+- `documentation.pdf`
+- `src/`  
+    - `arg_parser.cpp`
+    - `arg_pasrer.h`
+    - `client.cpp`
+    - `client.h`
+    - `commands.cpp`
+    - `commands.h`
+    - `connection.cpp`
+    - `connection.h`
+    - `file_manager.cpp`
+    - `file_manager.h`
+    - `main.cpp`
+    - `msg_parser.cpp`
+    - `msg_parser.h`
+    - `runner.cpp`
+    - `runner.h`
 
 ## Teória
 
 ### IMAP
 
-IMAP (Internet Message Access Protocol) umožňuje klientom prístup k emailom umiestneným na mail serveru. Narozdiel od POP3, ktorý email po stiahnutí vymaže zo serveru, IMAP tieto maily po stiahnutí na serveri ponechá a synchronizuje svoje akcie s ostatnými zariadeniami.  
+IMAP (Internet Message Access Protocol) [5] umožňuje klientom prístup k emailom umiestneným na mail serveru. Narozdiel od POP3, ktorý email po stiahnutí vymaže zo serveru, IMAP tieto maily po stiahnutí na serveri ponechá a synchronizuje svoje akcie s ostatnými zariadeniami.  
 Každá správa počas komunikácie s IMAP serverom sa začína s unikátnym reťazcom `tag`, tento tag sa mení (inkrementuje) každou správou poslanou z klienta - server svoje odpovede posiela s rovnakým tagom. Vďaka tomu vie klient zistiť, na ktorú spravu server odpovedá.  
 Dôležitou časťou je, že IMAP server môže kedykoľvek počas komunikácie poslať klientovi správu `BYE`, ktorá ukončuje spojenie.
 
@@ -103,18 +108,18 @@ Odpovede poslané od servera majú na začiatku kód statusu
 
 Pre vyberanie emailov môžeme použiť aj tzv. `flags` (príznaky), tieto nám umožňuju vylučiť nechcené emaily. Každý mail server môže mať svoje vlastné príznaky, avšak existujú štandartné ktoré sa vyskytujú na všetkých.
 
-##### Štandartné príznaky
+#### Štandartné príznaky
 
 - `\Seen`
 - `\Flagged`
 - `\Answered`
 - `\Draft`
 
-#### Štruktúra emailu
+### Štruktúra emailu
 
 Každý email je rozdelený na 2 hlavné časti -- Hlavička (Header) a telo (body). Okrem toho, sa k ním ukladajú metadata pre bližšie informácie.
 
-##### Hlavička
+#### Hlavička
 
 V hlavičke sa nachádzajú informácie o smerovaní emailu. Vyskytuje sa vo vrchnej časti emailu.  
 Zvykne obsahovat -
@@ -124,13 +129,13 @@ Zvykne obsahovat -
 - `Subject:` - Predmet emailu
 - `Date:` - Dátum emailu
 - `Message-ID:` - Unikátny identifikátor emailu
-- `Reply-To` - Špecifikuje adresu na ktorej správu email odpovedal
+- `Reply-To:` - Špecifikuje adresu na ktorej správu email odpovedal
 
-##### Telo
+#### Telo
 
 Telo mailu obsahuje hlavný obsah, väčšinou je štrukturované ako plaintext alebo HTML.
 
-##### Ostatné
+#### Ostatné
 
 Ďalšie informácie v emaili sú napr. 
 - `prílohy` - dokumenty, obrázky, videá, Posielajú sa ako osobitné časti v tele mailu pomocou Multipurpose Internet Mail Extensions (MIME) formátu
@@ -139,7 +144,7 @@ Telo mailu obsahuje hlavný obsah, väčšinou je štrukturované ako plaintext 
 
 ### SSL
 
-Slúží na šifrovanie dát pomocou symetrickej a asymetrickej enkrypcie. Pri prvotnom pripojení, klient kontroluje validitu certifikátu servera.
+Slúží na šifrovanie dát pomocou symetrickej a asymetrickej enkrypcie. Pri prvotnom pripojení, klient kontroluje validitu certifikátu servera. [1] [2] [3]
 
 ## Implementácia
 
@@ -155,16 +160,16 @@ Ak počas sťahovania správ nedošla klientovi odpoveď typu `BAD` alebo `NO`, 
 
 ### Komunikácia so serverom
 
-Komunikácia so serverom je implementovaná v súboroch `client.cpp` a `client.h`. Na TCP komunikáciu sa používajú knižnice `netdb`, `sys/socket`, `sys/types`. Metódy tejto triedy sú
+Komunikácia so serverom je implementovaná v súboroch `client.cpp` a `client.h`. Na TCP komunikáciu sa používajú knižnice `netdb`, `sys/socket`, `sys/types` [4]. Metódy tejto triedy sú
 - `connect` - na vytvorenie socketu a vytvorenie pripojenie so serverom
 - `send` - posielanie správ
 - `receive` - príjmanie správ, táto metóda vráti `std::pair` reťazca a bool - v prípade, že server pošle správu `BYE`, teda ukončí pripojenie tak sa bool vráti v hodnote `true`, čo naznačí programu aby ukončil spojenie a neposielal ďalšie správy. Táto funkcia cyklicky čaká na koniec správy (pod reťazcom OK/NO/BAD), ale je implementovaný timeout ktorý ukončí čakanie predčasne aby nedošlo k úplnému zaseknutiu. 
-Dôležitý je `TIMEOUT` - nastavený na 15 sekund. Ak od serveru nepríde do 15 sekúnd odpoveď obsahujúca `OK/BAD/NO` (so správnym tagom), tak sa program ukončí.
+Dôležitý je `TIMEOUT` - nastavený na 15 sekund. Ak od serveru nepríde do 15 sekúnd odpoveď obsahujúca `OK/BAD/NO` (so správnym tagom), tak sa program ukončí.[5][6][7] 
 
 
 ### Šifrovanie SSL
 
-Enkrypcia komunikácie je implementovaná v rovnakých súboroch ako aj komunikácia so serverom - `client.cpp` a `client.h`. Použivajú sa na to knižnice `openssl/ssl`, `openssl/err`.
+Enkrypcia komunikácie je implementovaná v rovnakých súboroch ako aj komunikácia so serverom - `client.cpp` a `client.h`. Použivajú sa na to knižnice `openssl/ssl`, `openssl/err` [1][2][3].
 Metódy implementujúce šifrovanie sú
 - `init_openssl` - inicializuje šifrovanie, pridá šifrovacie algoritmy, načíta správy pre errory, vytvorí SSL kontext pre TLS pripojenie a načíta verifikáciu certifikátov
 - `verify_certificate` - získa certifikát od serveru, ktorý následne verifikuje a v prípade neúspechu vypíše chybovú hlášku
@@ -221,7 +226,7 @@ Program pri získavaní nových správ používa parameter `NEW`. Ďalšie varia
 
 ## Testovanie
 
-Klient bol predovšetkým testovaný na serveri `imap.centrum.sk` cez poskytovateľa `pobox.sk`. Tu bol vytvorený email na ktorý boli posielané správy. `imap.centrum.sk` poskytuje možnosť pripojenia bez TLS - takže bol ideálny pre túto implementáciu. Komunikácia bola sledovaná cez `wireshark` - toto umožnilo správne otestovanie TLS. Na otestovanie konečnej implementácie bol na základe zadania použitý server `eva.fit.vutbr.cz`, na ktorom sa počas štúdia nahromadilo ~1500 správ (pri prihlásení na xolexa03 účet). Schnopnosť tohto programu správne stiahnuť všetky správy (otestované aj na serveri `merlin` bez nájdených chýb pomocou programu `valgrind`) ukázala jeho výslednú funkcionalitu a spoľahlivosť.  
+Klient bol predovšetkým testovaný na serveri `imap.centrum.sk` cez poskytovateľa `pobox.sk` [9]. Tu bol vytvorený email na ktorý boli posielané správy. `imap.centrum.sk` poskytuje možnosť pripojenia bez TLS - takže bol ideálny pre túto implementáciu. Komunikácia bola sledovaná cez `wireshark` [8] - toto umožnilo správne otestovanie TLS. Na otestovanie konečnej implementácie bol na základe zadania použitý server `eva.fit.vutbr.cz`, na ktorom sa počas štúdia nahromadilo ~1500 správ (pri prihlásení na xolexa03 účet). Schnopnosť tohto programu správne stiahnuť všetky správy (otestované aj na serveri `merlin` bez nájdených chýb pomocou programu `valgrind`) ukázala jeho výslednú funkcionalitu a spoľahlivosť.  
 
 Stiahnuté súbory vo formáte .eml boli otestované otvorením v programe microsoft outlook - čím sa otestovala správnosť zapisovania.  
 
@@ -244,3 +249,29 @@ Týmto spôsobom boli vyskúšané a odhalené možné chyby.
 
 ## Zdroje
 
+1. **OpenSSL**  
+   [OpenSSL - Cryptography Basics](https://opensource.com/article/19/6/cryptography-basics-openssl-part-1)
+
+2. **OpenSSL Manual**  
+   [OpenSSL Manual](https://docs.openssl.org/master/man3/)
+
+3. **OpenSSL IBM**  
+   [OpenSSL Tutorial by IBM](https://developer.ibm.com/tutorials/l-openssl/)
+
+4. **TCP Socket**  
+   [Socket Programming in C++](https://www.geeksforgeeks.org/socket-programming-in-cpp/)
+
+5. **IMAP**  
+   [IMAP 101 - Manual IMAP Sessions](https://www.atmail.com/blog/imap-101-manual-imap-sessions/)
+
+6. **IMAP Crib**  
+   [IMAP Crib](https://donsutherland.org/crib/imap)
+
+7. **RFC3501**  
+   [RFC3501 - IMAP Protocol](https://datatracker.ietf.org/doc/html/rfc3501)
+
+8. **Wireshark**  
+   [Wireshark](https://www.wireshark.org/)
+
+9. **Pobox**  
+   [Pobox](https://pobox.centrum.sk/)
