@@ -99,34 +99,55 @@ bool Runner::process_single_message(int msg_id, bool headers_only)
     {
         return false;
     }
-    // get file name and check if it exists
-    std::string file_name = parser_.get_file_name(response, conn_.only_message_headers_);
 
-    if (file_manager_.check_existence(conn_.out_dir_ + "/" + file_name))
-    {
-        return true; // skip existing files
-    }
+    // First get the base filename (without any H- prefix)
+    std::string base_filename = parser_.get_file_name(response, false);
+    std::string header_filename = "H-" + base_filename;
 
-    // fetch full message if needed
+    // Check existing files based on what we want to download
     if (headers_only)
     {
+        // If we want headers (H-) file:
+        // Skip if header file already exists
+        if (file_manager_.check_existence(conn_.out_dir_, header_filename, true))
+        {
+            return true;
+        }
+        // Skip if full message file exists (it contains more info)
+        if (file_manager_.check_existence(conn_.out_dir_, base_filename, false))
+        {
+            return true;
+        }
+
+        // Download header file
         if (!send_and_receive(commands_.fetch_header(tag_, msg_id), response))
         {
             return false;
         }
-        file_manager_.save_mail(file_name, response, conn_.out_dir_);
+        file_manager_.save_mail(header_filename, response, conn_.out_dir_);
     }
     else
-    {   
+    {
+        // If we want full message file:
+        // Skip if full message already exists
+        if (file_manager_.check_existence(conn_.out_dir_, base_filename, false))
+        {
+            return true;
+        }
+
+        // Check and remove header file if it exists before downloading full message
+        if (file_manager_.check_existence(conn_.out_dir_, header_filename, true))
+        {
+            std::string header_path = conn_.out_dir_ + "/" + header_filename;
+            file_manager_.remove_file(header_path);
+        }
+
+        // Download full message
         if (!send_and_receive(commands_.fetch(tag_, msg_id), response))
         {
             return false;
         }
-        if (file_manager_.check_existence(conn_.out_dir_ + "/" + "H-" + file_name))
-        {
-            file_manager_.remove_file(conn_.out_dir_ + "/" + "H-" + file_name);
-        }
-        file_manager_.save_mail(file_name, response, conn_.out_dir_);
+        file_manager_.save_mail(base_filename, response, conn_.out_dir_);
     }
 
     return true;

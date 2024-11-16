@@ -149,13 +149,18 @@ Slúží na šifrovanie dát pomocou symetrickej a asymetrickej enkrypcie. Pri p
 ## Implementácia
 
 Program impactl je implementovaný v programovacom jazyku C++ 20. Je rozdelený do 4 hlavných častí, ktoré sú používané v `main.cpp`. Najprv, sa pomocou `argument_parser` uložia argumenty z volania programu do pomocného objektu triedy `Connection`. Tento objekt sa používa na držanie potrebných informácii. Následne sa vytvorí inštancia triedy `File_manager`, ktorý slúži na prístup k súborom. Nad týmto objektom sa zavolá metóda `get_auth_data` s referenciou na inštanciu triedy `connection` a uloží doň dáta.  
-Nakoniec sa vytvorí objekt triedy `runner`, ktorý využíva dáta získané z `connection` a pomocou metódy `.run()` spustí hlavnú funkcionalitu programu.  
+Nakoniec sa vytvorí objekt triedy `runner`, ktorý využíva dáta získané z `connection` a pomocou metódy `.run()` spustí hlavnú funkcionalitu programu.    
+
+![Main](./chart.svg)  
 
 `Runner` je trieda ktorá slúži pre hlavný beh programu. V jej konštruktore sa vytvárajú inštancie tried `Client`, `Commands` a `MsgParser`. Metóda `run` tieto objekty využíva a volá ich metódy pre implementovanie funkcionality IMAP klientu.   
 Na začiatku sa vytvóri spojenie pomocou `initialize_connection`, ktorá najprv pošle prázdnu správu serveru, potom pošle údaje na prihlásenie, získa možnosti serveru, vyberie schránku a získa počet správ.  
 Následne sa podľa zadaných argumentov rozhodne, či bude získavať iba nové správy pomocou `fetch_new_messages` alebo všetky, Podľa toho si uloží dáta do vektoru `messages_to_process`. Nakoniec sa zavolá metóda `process_messages`, ktorá na ID každej uloženej správy zavolá `process_single_message` a tá skontroluje existenciu jednotlivých správ - v prípade že neexistujú, tak sú stiahnuté a uložené do adresára.  
 Ak počas sťahovania správ nedošla klientovi odpoveď typu `BAD` alebo `NO`, považuje sa beh za úspešný a nakoniec sa odošle iba príkaz `logout`.  
-`Runner` na komunikáciu so serverom používa metódu `send_and_receive` - táto metóda slúži na jednotné poslanie a prijatie správy - pretože každá poslaná správa čaká na odpoveď. Taktiež je to spôsob ktorým sa spravujú tagy.
+`Runner` na komunikáciu so serverom používa metódu `send_and_receive` - táto metóda slúži na jednotné poslanie a prijatie správy - pretože každá poslaná správa čaká na odpoveď. Taktiež je to spôsob ktorým sa spravujú tagy. Pre získanie príkazu v správnom formáte, ktorý príjme IMAP server sa používa trieda `Commands`, ktorého metódy tieto príkazy navrátia.  
+
+![Main](./flowchar.svg)  
+
 
 
 ### Komunikácia so serverom

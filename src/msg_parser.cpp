@@ -216,18 +216,16 @@ std::string MsgParser::get_file_name(std::string response, bool header)
     std::string cleanedFileName;
 
     std::string file_name;
-    // create file name, if header is true, add H- to the beginning of the file name
-    if (!header)
-    {
-        file_name = from + "-" + date + "-" + subject + "-" + message_id;
-    }
-    else
-    {
-        file_name = "H-" + from + "-" + date + "-" + subject + "-" + message_id;
-    }
+    // Calculate maximum length considering the prefix and extension
+    const size_t max_length = 250 - 4; // 4 for ".eml"
+    const std::string prefix = header ? "H-" : "";
+    const size_t available_length = max_length - prefix.length();
 
-    // Remove forbidden characters from the file name  
-    for (char c : file_name)
+    // First create the base filename without prefix
+    std::string base_name = from + "-" + date + "-" + subject + "-" + message_id;
+
+    // Remove forbidden characters
+    for (char c : base_name)
     {
         if (forbiddenChars.count(c) == 0)
         {
@@ -235,13 +233,13 @@ std::string MsgParser::get_file_name(std::string response, bool header)
         }
     }
 
-    file_name = cleanedFileName;
-    // If the file name is too long, cut it to 250 characters
-    if (file_name.length() > 250)
+    // Truncate if necessary
+    if (cleanedFileName.length() > available_length)
     {
-        file_name = file_name.substr(0, 250);
+        cleanedFileName = cleanedFileName.substr(0, available_length);
     }
 
-    file_name.append(".eml");
+    // Add prefix and extension
+    file_name = prefix + cleanedFileName + ".eml";
     return file_name;
 }

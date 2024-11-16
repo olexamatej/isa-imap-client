@@ -41,39 +41,36 @@ void File_manager::get_auth_data(Connection *conn, std::string file_name)
 }
 
 // save mail to file
-void File_manager::save_mail(std::string file_name, std::string mail, std::string out_dir_)
+void File_manager::save_mail(std::string file_name, std::string mail, std::string out_dir_) 
 {
     std::ofstream file(out_dir_ + "/" + file_name);
-        if (file.is_open())
-        {
-            size_t first_newline = mail.find('\n');
+    if (!file.is_open()) {
+        return;
+    }
 
-            // find last parenthese, that is where the mail ends
-            size_t last_paren = mail.rfind(')');
-
-            size_t last_newline = mail.rfind('\n', last_paren);
-
-            if (first_newline != std::string::npos && last_newline != std::string::npos && first_newline < last_newline)
-            {
-                std::string email_content = mail.substr(first_newline + 1, last_newline - first_newline - 3);
-                file << email_content;
-            }
-            else
-            {
-                file << mail;
-            }
+    size_t size_start = mail.find("{");
+    size_t size_end = mail.find("}");
+    
+    if (size_start != std::string::npos && size_end != std::string::npos) {
+        std::string size_str = mail.substr(size_start + 1, size_end - size_start - 1);
+        size_t message_size = std::stoull(size_str);
+        
+        size_t message_start = mail.find("\r\n", size_end) + 2;
+        
+        if (message_start != std::string::npos) {
+            file.write(mail.c_str() + message_start, message_size);
         }
-        else
-        {
-            return;
-        }
-        file.close();
+    } else {
+        file << mail;
+    }
+    
+    file.close();
 }
-
 // check if file exists
-bool File_manager::check_existence(std::string file_name)
+bool File_manager::check_existence(std::string directory, std::string file_name, bool headers_only)
 {
-    std::ifstream file(file_name);
+    std::ifstream file(directory + "/" + file_name);
+
     if (file.is_open())
     {
         file.close();
