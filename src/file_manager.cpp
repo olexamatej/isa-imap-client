@@ -1,9 +1,8 @@
 #include "file_manager.h"
 
-
-void File_manager::get_auth_data(Connection* conn, std::string file_name)
+// get username and password from file
+void File_manager::get_auth_data(Connection *conn, std::string file_name)
 {
-    
 
     std::string line;
     std::ifstream file(file_name);
@@ -17,7 +16,7 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
         }
         else
         {
-            std::cerr << "Error reading login" << std::endl;
+            std::cerr << "ERROR: reading login" << std::endl;
             exit(1);
         }
 
@@ -28,57 +27,50 @@ void File_manager::get_auth_data(Connection* conn, std::string file_name)
         }
         else
         {
-            std::cerr << "Error reading password" << std::endl;
+            std::cerr << "ERROR: reading password" << std::endl;
             exit(1);
         }
     }
     else
     {
-        std::cerr << "Error opening file when getting data" << std::endl;
+        std::cerr << "ERROR: opening file when getting data" << std::endl;
+        exit(1);
     }
 
     file.close();
 }
 
-//TODO here is error on auto tests
+// save mail to file
 void File_manager::save_mail(std::string file_name, std::string mail, std::string out_dir_)
 {
     std::ofstream file(out_dir_ + "/" + file_name);
-    if(file_name.length() > 256){
-        std::cerr << "Error: Could not get file name" << std::endl;
-    }
-    else if(file_name.find('/') != std::string::npos){
-        std::cerr << "Error: Invalid file name" << std::endl;
-    }
-
-    else{
-    if (file.is_open())
-    {   
-        size_t first_newline = mail.find('\n');
-        
-        // find last parenthese, that is where the mail ends
-        size_t last_paren = mail.rfind(')');
-        
-        size_t last_newline = mail.rfind('\n', last_paren);
-        
-        if (first_newline != std::string::npos && last_newline != std::string::npos && first_newline < last_newline)
+        if (file.is_open())
         {
-            std::string email_content = mail.substr(first_newline + 1, last_newline - first_newline - 3);
-            file << email_content;
+            size_t first_newline = mail.find('\n');
+
+            // find last parenthese, that is where the mail ends
+            size_t last_paren = mail.rfind(')');
+
+            size_t last_newline = mail.rfind('\n', last_paren);
+
+            if (first_newline != std::string::npos && last_newline != std::string::npos && first_newline < last_newline)
+            {
+                std::string email_content = mail.substr(first_newline + 1, last_newline - first_newline - 3);
+                file << email_content;
+            }
+            else
+            {
+                file << mail;
+            }
         }
         else
         {
-            file << mail;
+            return;
         }
-    }
-    else
-    {   
-        std::cerr << "Error opening file" << std::endl;
-    }
-    file.close();
-    }
+        file.close();
 }
 
+// check if file exists
 bool File_manager::check_existence(std::string file_name)
 {
     std::ifstream file(file_name);
@@ -92,11 +84,8 @@ bool File_manager::check_existence(std::string file_name)
         return false;
     }
 }
-
+// remove file
 void File_manager::remove_file(std::string file_name)
 {
-    if (remove(file_name.c_str()) != 0)
-    {
-        std::cerr << "Error deleting file" << std::endl;
-    }
+    if (remove(file_name.c_str()) != 0);
 }

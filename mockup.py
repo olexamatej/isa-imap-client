@@ -64,7 +64,7 @@ class MockIMAPServer:
                 time.sleep(0.5)
                 client_socket.close()
         except Exception as e:
-            print(f"Error sending response: {e}")
+            print(f"ERROR: sending response: {e}")
 
     def handle_client(self, client_socket, client_address):
         """Handle communication with a connected client."""
@@ -124,7 +124,7 @@ class MockIMAPServer:
                 else:
                     self.send_response(client_socket, f"{tag} BAD Unknown command\r\n")
         except Exception as e:
-            print(f"Error handling client {client_address}: {e}")
+            print(f"ERROR: handling client {client_address}: {e}")
         finally:
             client_socket.close()
 
@@ -146,7 +146,7 @@ class MockIMAPServer:
                 threading.Thread(target=self.handle_client, args=(client_socket, client_address)).start()
             except Exception as e:
                 if self.running:
-                    print(f"Error accepting connection: {e}")
+                    print(f"ERROR: accepting connection: {e}")
 
     def stop(self):
         """Stop the mock IMAP server."""

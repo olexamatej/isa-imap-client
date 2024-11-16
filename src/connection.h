@@ -7,6 +7,7 @@
 class Connection{
     public:
         Connection();
+        // prints connection parameters, used for debugging
         void print_connection(){
             std::cout << "server_: " << server_ << std::endl;
             std::cout << "port_: " << port_ << std::endl;
@@ -20,6 +21,7 @@ class Connection{
             std::cout << "inbox: " << inbox_ << std::endl;
         }
 
+        // connection parameters with default parameters
         std::string auth_file_;
         std::string out_dir_;
         bool interactive_ = false;
@@ -29,7 +31,7 @@ class Connection{
         bool only_new_messages_;
         bool only_message_headers_;
         std::string inbox_ = "INBOX";
-
+    
         std::string user_name_ = "";
         std::string user_password_ = "";
         std::string server_;

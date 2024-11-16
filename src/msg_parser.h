@@ -15,7 +15,7 @@ public:
     void get_mailbox_names(const std::string response);
 
     std::string extract_header_field(const std::string header, const std::string field);
-    std::string get_file_name(const std::string response);
+    std::string get_file_name(const std::string response, bool header);
 
     std::vector<std::string> capabilities_;
     std::vector<std::string> mailbox_list_;

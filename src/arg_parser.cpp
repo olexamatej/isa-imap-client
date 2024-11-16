@@ -1,21 +1,21 @@
 #include "arg_parser.h"
 
+// parses arguments and returns Connection object with saved values
 Connection parse_arg(int argc, char *argv[])
 {
     Connection conn;
     int opt;
     bool cert_set = false;
     opterr = 0;
-    // parse command line arguments, it checks long and short versions
+    // parse command line arguments
     while ((opt = getopt(argc, argv, "p:Tc:C:nha:b:o:i")) != -1)
     {
         switch (opt)
         {
-            // port_
         case 'p':
             if (optarg == NULL)
             {
-                std::cerr << "Error: -p requires a numeric argument\n";
+                std::cerr << "ERROR: -p requires a numeric argument\n";
                 exit(EXIT_FAILURE);
             }
             conn.port_ = optarg;
@@ -58,16 +58,17 @@ Connection parse_arg(int argc, char *argv[])
 
     // After processing options, set conn.server_ to the next argument
     if(conn.auth_file_.empty() || conn.out_dir_.empty()){
-        std::cerr << "Error: Auth file and out dir are required\n";
+        std::cerr << "ERROR: Auth file and out dir are required\n";
         exit(EXIT_FAILURE);
     }
+    // check any invalid arguments
     if (optind < argc)
     {
         conn.server_ = argv[optind];
     }
     else
     {
-        std::cerr << "Error: No server_ address provided\n";
+        std::cerr << "ERROR: No server_ address provided\n";
         exit(EXIT_FAILURE);
     }
     if (conn.port_.empty())

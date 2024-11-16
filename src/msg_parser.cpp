@@ -2,9 +2,11 @@
 #include <unordered_set>
 #include <algorithm>
 
+// Parses the response to get the number of messages in the mailbox
 void MsgParser::get_message_count(const std::string response)
 {
     std::string::size_type pos = response.find("exists");
+    // If "exists" is found, extract the number of messages
     if (pos != std::string::npos)
     {
         std::string::size_type start = 0;
@@ -21,15 +23,17 @@ void MsgParser::get_message_count(const std::string response)
     {
         this->message_count_ = 0; // If "exists" is not found, set message_count_ to 0
     }
-    std::cout << "Message count: " << this->message_count_ << std::endl;
 }
 
+// Parses the response to get the message IDs of new messages in the mailbox
+// Returns a vector of message IDs
 std::vector<int> MsgParser::get_new_messages(const std::string response)
 {
     std::vector<int> new_messages_;
     std::string temp;
     size_t pos = response.find("* SEARCH");
 
+    // If "* SEARCH" is found, extract the message IDs
     if (pos != std::string::npos)
     {
         pos += 8;
@@ -67,6 +71,7 @@ std::vector<int> MsgParser::get_new_messages(const std::string response)
     return new_messages_;
 }
 
+// Parses the response to get the capabilities of the server
 void MsgParser::get_capability(const std::string response)
 {
     std::string::size_type pos = response.find("CAPABILITY");
@@ -105,6 +110,7 @@ void MsgParser::get_capability(const std::string response)
     }
 }
 
+// parses the response to get the mailbox names
 void MsgParser::get_mailbox_names(const std::string response)
 {
     std::string::size_type pos = 0;
@@ -126,6 +132,7 @@ void MsgParser::get_mailbox_names(const std::string response)
     }
 }
 
+// extracts the header field from the header
 std::string MsgParser::extract_header_field(const std::string header, const std::string field)
 {
     std::string::size_type pos = header.find(field);
@@ -149,10 +156,12 @@ std::string MsgParser::extract_header_field(const std::string header, const std:
     return "";
 }
 
-// gets date, from, subject and message id
-std::string MsgParser::get_file_name(std::string response)
+// gets date, from, subject and message id and creates a file name 
+// returns the file name as string
+std::string MsgParser::get_file_name(std::string response, bool header)
 {
     std::string date = extract_header_field(response, "Date: ");
+    // Replace spaces with underscores, commas with dashes and remove plus signs
     if (!date.empty())
     {
         for (long unsigned int i = 0; i < date.length(); i++)
@@ -189,22 +198,35 @@ std::string MsgParser::get_file_name(std::string response)
     std::string subject = extract_header_field(response, "Subject: ");
 
     std::string message_id = extract_header_field(response, "Message-Id: ");
-    if(message_id.empty()){
+    if (message_id.empty())
+    {
         message_id = extract_header_field(response, "Message-ID: ");
     }
     if (!message_id.empty())
     {
+        // Remove the brackets from the message ID
         if (message_id[0] == '<')
         {
             message_id = message_id.substr(1, message_id.length() - 2);
         }
     }
-    
+
+    // Remove forbidden characters from the file name
     static const std::unordered_set<char> forbiddenChars = {'/', '\\', ':', '*', '?', '"', '<', '>', '|'};
     std::string cleanedFileName;
-    std::string file_name = from + "-" + date + "-" + subject + "-" + message_id;
 
+    std::string file_name;
+    // create file name, if header is true, add H- to the beginning of the file name
+    if (!header)
+    {
+        file_name = from + "-" + date + "-" + subject + "-" + message_id;
+    }
+    else
+    {
+        file_name = "H-" + from + "-" + date + "-" + subject + "-" + message_id;
+    }
 
+    // Remove forbidden characters from the file name  
     for (char c : file_name)
     {
         if (forbiddenChars.count(c) == 0)
@@ -214,12 +236,11 @@ std::string MsgParser::get_file_name(std::string response)
     }
 
     file_name = cleanedFileName;
-    
+    // If the file name is too long, cut it to 250 characters
     if (file_name.length() > 250)
     {
         file_name = file_name.substr(0, 250);
     }
-    
 
     file_name.append(".eml");
     return file_name;

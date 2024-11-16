@@ -2,7 +2,7 @@
 
 #define TIMEOUT 15
 
-// creating connection
+// creating connection with server_
 Client::Client(std::string ip_address, std::string port_, bool encryption_, std::string cert_file_, std::string cert_dir_)
 {
     this->ip_address_ = ip_address;
@@ -16,6 +16,7 @@ Client::Client(std::string ip_address, std::string port_, bool encryption_, std:
     connect();
 }
 
+// destructor
 Client::~Client()
 {
     close(_socket);
@@ -27,30 +28,32 @@ Client::~Client()
     EVP_cleanup();
 }
 
-    void Client::init_openssl(std::string cert_file_, std::string cert_dir_)
+// initialize openssl
+void Client::init_openssl(std::string cert_file_, std::string cert_dir_)
+{
+    SSL_library_init();
+    OpenSSL_add_all_algorithms();
+    SSL_load_error_strings();
+    ctx = SSL_CTX_new(TLS_client_method());
+
+    // if file was not set -> put it as nullptr
+    const char *cert_file_ptr = cert_file_.empty() ? nullptr : cert_file_.c_str();
+    // Verify validity of dir and file
+    if (!SSL_CTX_load_verify_locations(ctx, cert_file_ptr, cert_dir_.c_str()))
     {
-        SSL_library_init();
-        OpenSSL_add_all_algorithms();
-        SSL_load_error_strings();
-        ctx = SSL_CTX_new(TLS_client_method());
-
-        //if file was not set -> put it as nullptr
-        const char *cert_file_ptr = cert_file_.empty() ? nullptr : cert_file_.c_str();
-        //Verify validity of dir and file
-        if (!SSL_CTX_load_verify_locations(ctx, cert_file_ptr, cert_dir_.c_str()))
-        {
-            std::cerr << "ERROR: Failed to load CA certificates" << std::endl;
-            ERR_print_errors_fp(stderr);
-            exit(EXIT_FAILURE);
-        }
+        std::cerr << "ERROR: Failed to load CA certificates" << std::endl;
+        ERR_print_errors_fp(stderr);
+        exit(EXIT_FAILURE);
     }
-
+}
+// verify certificate, returns true if certificate is valid
 bool Client::verify_certificate()
 {
+    // Get the server_'s certificate
     X509 *cert = SSL_get_peer_certificate(ssl);
     if (cert == nullptr)
     {
-        std::cerr << "Error: No certificate provided by the server_" << std::endl;
+        std::cerr << "ERROR: No certificate provided by the server_" << std::endl;
         return false;
     }
 
@@ -58,7 +61,7 @@ bool Client::verify_certificate()
     long result = SSL_get_verify_result(ssl);
     if (result != X509_V_OK)
     {
-        std::cerr << "Error: Certificate verification failed: " << X509_verify_cert_error_string(result) << std::endl;
+        std::cerr << "ERROR: Certificate verification failed: " << X509_verify_cert_error_string(result) << std::endl;
         X509_free(cert);
         return false;
     }
@@ -67,6 +70,7 @@ bool Client::verify_certificate()
     return true;
 }
 
+// connect to server_
 void Client::connect()
 {
     int status;
@@ -83,7 +87,7 @@ void Client::connect()
         fprintf(stderr, "getaddrinfo error: %s\n", gai_strerror(status));
         exit(1);
     }
-
+    // create socket
     _socket = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
     if (_socket == -1)
     {
@@ -102,8 +106,7 @@ void Client::connect()
         }
     }
 
-    // encryption_
-
+    // encryption
     if (encryption_ == true)
     {
         ssl = SSL_new(ctx);
@@ -121,12 +124,14 @@ void Client::connect()
 // send message
 void Client::send(std::string message)
 {
+    // if encryption is enabled, send message using SSL_write
     if (encryption_ == true)
     {
         SSL_write(ssl, message.c_str(), message.size());
     }
     else
     {
+        // send message using send
         ssize_t bytes_sent = ::send(_socket, message.c_str(), message.size(), 0);
         if (bytes_sent == -1)
         {
@@ -135,7 +140,7 @@ void Client::send(std::string message)
     }
 }
 
-// receive message
+// receive message, returns pair of message and bool - true if server closes connection via BYE or etc
 std::pair<std::string, bool> Client::receive(uint64_t tag)
 {
     // Set socket timeout
@@ -147,13 +152,15 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
     {
         perror("setsockopt failed");
     }
-
     std::string full_response;
     bool bye = false;
     while (true)
     {
+        // buffer for message, that is putting data into full_response and checking if message is complete
         char buffer[10000];
         ssize_t bytes_received;
+
+        // receive message, using SSL_read if encryption is enabled
         if (encryption_)
         {
             bytes_received = SSL_read(ssl, buffer, sizeof(buffer));
@@ -168,14 +175,14 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
             if (errno == EWOULDBLOCK || errno == EAGAIN)
             {
                 // Timeout occurred
-                std::cerr << "Timeout after " << TIMEOUT << " seconds" << std::endl;
+                std::cerr << "ERROR: Timeout after " << TIMEOUT << " seconds" << std::endl;
 
                 return std::make_pair("", true);
             }
             else if (errno == ECONNRESET)
             {
                 // Connection has been closed by the server
-                std::cerr << "Connection closed by the server" << std::endl;
+                std::cerr << "ERROR: Connection closed by the server" << std::endl;
                 return std::make_pair("", true);
             }
             else
@@ -187,7 +194,7 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
         else if (bytes_received == 0)
         {
             // Connection has been closed by the server
-            std::cerr << "Connection closed by the server" << std::endl;
+            std::cerr << "ERROR: Connection closed by the server" << std::endl;
             return std::make_pair("", true);
         }
 
@@ -195,6 +202,7 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
         std::string tag_str = std::to_string(tag);
         full_response += response;
 
+        // check if message is complete
         if (full_response.rfind(tag_str + " OK BYE") != std::string::npos)
         {
             bye = true;
@@ -212,7 +220,7 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
             std::cerr << "ERROR: Server denies access, 'NO' received" << std::endl;
             exit(1);
         }
-        else if(full_response.rfind(tag_str + " BAD") != std::string::npos)
+        else if (full_response.rfind(tag_str + " BAD") != std::string::npos)
         {
             std::cerr << "ERROR: Invalid syntax" << std::endl;
             exit(1);
