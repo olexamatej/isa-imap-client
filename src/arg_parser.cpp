@@ -33,7 +33,7 @@ Connection parse_arg(int argc, char *argv[])
             break;
         case 'C':
             conn.cert_dir_ = optarg;
-            cert_set;
+            cert_set = true;
             break;
         case 'n':
             conn.only_new_messages_ = true;
@@ -82,7 +82,9 @@ Connection parse_arg(int argc, char *argv[])
         }
     }
     if(cert_set && conn.encryption_ == false){
-        std::cerr << "WARNING: Certificate file set, but encryption_ is not enabled\n";
+        
+        std::cerr << "ERROR: Certificate file or dir set, but encryption (-T) is not enabled\n";
+        exit(EXIT_FAILURE);
     }
     
 

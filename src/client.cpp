@@ -27,22 +27,23 @@ Client::~Client()
     EVP_cleanup();
 }
 
-void Client::init_openssl(std::string cert_file_, std::string cert_dir_)
-{
-    SSL_library_init();
-    OpenSSL_add_all_algorithms();
-    SSL_load_error_strings();
-    ctx = SSL_CTX_new(TLS_client_method());
-
-    const char *cert_file__ptr = cert_file_.empty() ? nullptr : cert_file_.c_str();
-
-    if (!SSL_CTX_load_verify_locations(ctx, cert_file__ptr, cert_dir_.c_str()))
+    void Client::init_openssl(std::string cert_file_, std::string cert_dir_)
     {
-        std::cerr << "Failed to load CA certificates" << std::endl;
-        ERR_print_errors_fp(stderr);
-        exit(EXIT_FAILURE);
+        SSL_library_init();
+        OpenSSL_add_all_algorithms();
+        SSL_load_error_strings();
+        ctx = SSL_CTX_new(TLS_client_method());
+
+        //if file was not set -> put it as nullptr
+        const char *cert_file_ptr = cert_file_.empty() ? nullptr : cert_file_.c_str();
+        //Verify validity of dir and file
+        if (!SSL_CTX_load_verify_locations(ctx, cert_file_ptr, cert_dir_.c_str()))
+        {
+            std::cerr << "ERROR: Failed to load CA certificates" << std::endl;
+            ERR_print_errors_fp(stderr);
+            exit(EXIT_FAILURE);
+        }
     }
-}
 
 bool Client::verify_certificate()
 {
@@ -209,7 +210,7 @@ std::pair<std::string, bool> Client::receive(uint64_t tag)
 
         else if (full_response.rfind(tag_str + " NO") != std::string::npos)
         {
-            std::cerr << "ERROR: NO responce received" << std::endl;
+            std::cerr << "ERROR: Server denies access, 'NO' received" << std::endl;
             exit(1);
         }
         else if(full_response.rfind(tag_str + " BAD") != std::string::npos)
