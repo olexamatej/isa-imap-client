@@ -1,3 +1,5 @@
+// Author: Matej Olexa (xolexa03)
+
 #pragma once
 
 #include "connection.h"
@@ -5,6 +7,7 @@
 #include "client.h"
 #include "commands.h"
 #include "msg_parser.h"
+#include <algorithm>
 
 class Runner {
 public:

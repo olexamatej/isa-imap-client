@@ -1,6 +1,6 @@
+// Author: Matej Olexa (xolexa03)
+
 #include "msg_parser.h"
-#include <unordered_set>
-#include <algorithm>
 
 // Parses the response to get the number of messages in the mailbox
 void MsgParser::get_message_count(const std::string response)

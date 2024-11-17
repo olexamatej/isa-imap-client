@@ -1,3 +1,5 @@
+// Author: Matej Olexa (xolexa03)
+
 #include "client.h"
 
 #define TIMEOUT 15

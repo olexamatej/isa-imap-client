@@ -1,3 +1,5 @@
+// Author: Matej Olexa (xolexa03)
+
 #pragma once
 #include <string>
 #include <iostream>

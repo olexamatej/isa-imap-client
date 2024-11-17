@@ -1,3 +1,5 @@
+// Author: Matej Olexa (xolexa03)
+
 #include "file_manager.h"
 
 // get username and password from file
@@ -33,7 +35,7 @@ void File_manager::get_auth_data(Connection *conn, std::string file_name)
     }
     else
     {
-        std::cerr << "ERROR: opening file when getting data" << std::endl;
+        std::cerr << "ERROR: opening file when trying to auth" << std::endl;
         exit(1);
     }
 

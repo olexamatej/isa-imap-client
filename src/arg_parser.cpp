@@ -1,3 +1,5 @@
+// Author: Matej Olexa (xolexa03)
+
 #include "arg_parser.h"
 
 // parses arguments and returns Connection object with saved values

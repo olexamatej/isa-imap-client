@@ -1,3 +1,5 @@
+// Author: Matej Olexa (xolexa03)
+
 #include <iostream>
 #include <string>
 #include "runner.h"

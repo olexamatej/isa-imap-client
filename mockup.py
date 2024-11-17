@@ -1,3 +1,6 @@
+#author - Matej Olexa (xolexa03)
+
+# Simple MOCK IMAP server for testing purposes
 import socket
 import threading
 import time

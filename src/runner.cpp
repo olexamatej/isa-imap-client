@@ -1,5 +1,6 @@
+// Author: Matej Olexa (xolexa03)
+
 #include "runner.h"
-#include <algorithm>
 
 Runner::Runner(Connection conn, File_manager file_manager)
     : conn_(conn), file_manager_(file_manager), client_(conn.server_, conn.port_, conn.encryption_, conn.cert_file_, conn.cert_dir_), commands_(), parser_()
@@ -7,7 +8,6 @@ Runner::Runner(Connection conn, File_manager file_manager)
 {
     if (conn_.encryption_ && !client_.verify_certificate())
     {
-        std::cerr << "Certificate verification failed" << std::endl;
         exit(1);
     }
 }
@@ -100,49 +100,48 @@ bool Runner::process_single_message(int msg_id, bool headers_only)
         return false;
     }
 
-    // First get the base filename (without any H- prefix)
+    // Get the base filename and header filename
     std::string base_filename = parser_.get_file_name(response, false);
     std::string header_filename = "H-" + base_filename;
 
     // Check existing files based on what we want to download
     if (headers_only)
     {
-        // If we want headers (H-) file:
-        // Skip if header file already exists
+        // skip if header file already exists
         if (file_manager_.check_existence(conn_.out_dir_, header_filename, true))
         {
             return true;
         }
-        // Skip if full message file exists (it contains more info)
+        // skip if full message file already exists
         if (file_manager_.check_existence(conn_.out_dir_, base_filename, false))
         {
             return true;
         }
 
-        // Download header file
+        // download header file
         if (!send_and_receive(commands_.fetch_header(tag_, msg_id), response))
         {
             return false;
         }
         file_manager_.save_mail(header_filename, response, conn_.out_dir_);
     }
+    // full messages
     else
     {
-        // If we want full message file:
-        // Skip if full message already exists
+        // skip if full message file already exists
         if (file_manager_.check_existence(conn_.out_dir_, base_filename, false))
         {
             return true;
         }
 
-        // Check and remove header file if it exists before downloading full message
+        // check and remove header file if it exists before downloading full message
         if (file_manager_.check_existence(conn_.out_dir_, header_filename, true))
         {
             std::string header_path = conn_.out_dir_ + "/" + header_filename;
             file_manager_.remove_file(header_path);
         }
 
-        // Download full message
+        // download full message
         if (!send_and_receive(commands_.fetch(tag_, msg_id), response))
         {
             return false;
@@ -193,7 +192,7 @@ void Runner::run()
         }
     }
 
-    // Process all messages
+    // process all messages
     if (!process_messages(messages_to_process, conn_.only_message_headers_))
     {
         return;
@@ -206,5 +205,5 @@ void Runner::run()
         std::cerr << "ERROR: Logout failed" << std::endl;
         return;
     }
-    std::cerr << messages_to_process.size() << " downloaded messages from " << conn_.server_ << std::endl;
+    std::cout << messages_to_process.size() << " downloaded messages from " << conn_.server_ << std::endl;
 }

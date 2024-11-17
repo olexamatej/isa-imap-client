@@ -1,3 +1,5 @@
+// Author: Matej Olexa (xolexa03)
+
 #include "commands.h"
 
 #define EOL "\r\n"

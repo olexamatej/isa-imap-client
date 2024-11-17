@@ -1,3 +1,5 @@
+// Author: Matej Olexa (xolexa03)
+
 #include "connection.h"
 
 Connection::Connection(){
