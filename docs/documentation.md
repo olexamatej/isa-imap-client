@@ -6,7 +6,7 @@
 
 [Popis](#popis)  
 [Spustenie](#Spustenie)  
-[Zoznam odovzdaných súborov](#Zoznam-odovzdaných-súborov)
+[Zoznam odovzdaných súborov](#Zoznam-odovzdaných-súborov)  
 [Teória](#Teória)  
 [Implementácia](#Implementácia)  
 [Komunikácia so serverom](#Komunikácia-so-serverom)  
@@ -151,7 +151,7 @@ Slúží na šifrovanie dát pomocou symetrickej a asymetrickej enkrypcie. Pri p
 Program impactl je implementovaný v programovacom jazyku C++ 20. Je rozdelený do 4 hlavných častí, ktoré sú používané v `main.cpp`. Najprv, sa pomocou `argument_parser` uložia argumenty z volania programu do pomocného objektu triedy `Connection`. Tento objekt sa používa na držanie potrebných informácii. Následne sa vytvorí inštancia triedy `File_manager`, ktorý slúži na prístup k súborom. Nad týmto objektom sa zavolá metóda `get_auth_data` s referenciou na inštanciu triedy `connection` a uloží doň dáta.  
 Nakoniec sa vytvorí objekt triedy `runner`, ktorý využíva dáta získané z `connection` a pomocou metódy `.run()` spustí hlavnú funkcionalitu programu.    
 
-![Main](./chart.svg)  
+![Main flow](./chart.pdf)  
 
 `Runner` je trieda ktorá slúži pre hlavný beh programu. V jej konštruktore sa vytvárajú inštancie tried `Client`, `Commands` a `MsgParser`. Metóda `run` tieto objekty využíva a volá ich metódy pre implementovanie funkcionality IMAP klientu.   
 Na začiatku sa vytvóri spojenie pomocou `initialize_connection`, ktorá najprv pošle prázdnu správu serveru, potom pošle údaje na prihlásenie, získa možnosti serveru, vyberie schránku a získa počet správ.  
@@ -159,7 +159,7 @@ Následne sa podľa zadaných argumentov rozhodne, či bude získavať iba nové
 Ak počas sťahovania správ nedošla klientovi odpoveď typu `BAD` alebo `NO`, považuje sa beh za úspešný a nakoniec sa odošle iba príkaz `logout`.  
 `Runner` na komunikáciu so serverom používa metódu `send_and_receive` - táto metóda slúži na jednotné poslanie a prijatie správy - pretože každá poslaná správa čaká na odpoveď. Taktiež je to spôsob ktorým sa spravujú tagy. Pre získanie príkazu v správnom formáte, ktorý príjme IMAP server sa používa trieda `Commands`, ktorého metódy tieto príkazy navrátia.  
 
-![Main](./flowchar.svg)  
+![Flowchart](./flowchar.pdf)  
 
 
 
@@ -219,7 +219,9 @@ Na ukládanie sa používajú metódy
 - `check_existence`
 - `remove_file`
 
-Cez získané dôležité dáta z hlavičky emailu si vieme skontrolovať existenciu správy v adresári. V tejto implementácii sa súbory obsahujúce čisto hlavičku mailu označujú prefixom `H-`. Ak chceme uložiť celú správu, najprv skontrolujeme jej existenciu v adresári - v prípade jej existencie sa nebude ukladať 2x. Taktiež sa kontroluje existencia hlavičkového súboru v adresári, ak existuje tak sa vymaže a vytvorí sa súbor s celou správou, už bez prefixu `H-`. Meno emailu je ale obmedzene počtom znakov na 250, kvôli limitáciam dĺžky názvy súboru linuxu.
+Cez získané dôležité dáta z hlavičky emailu si vieme skontrolovať existenciu správy v adresári. V tejto implementácii sa súbory obsahujúce čisto hlavičku mailu označujú prefixom `H-`. Ak chceme uložiť celú správu, najprv skontrolujeme jej existenciu v adresári - v prípade jej existencie sa nebude ukladať 2x. Taktiež sa kontroluje existencia hlavičkového súboru v adresári, ak existuje tak sa vymaže a vytvorí sa súbor s celou správou, už bez prefixu `H-`. Meno emailu je ale obmedzene počtom znakov na 250, kvôli limitáciam dĺžky názvy súboru v OS linux.  
+Stiahnuté súbory su teda pomenované pomocou kombinácie 
+`odosielateľ-dátum-predmet-MessageID`
 
 ### Prečo nepouživať UID?
 V tejto implementácii nie je použitý UID na pomenovanie súborov; namiesto neho je využitý Message-ID, aj keď je dlhší a menej prehľadný. Najväčšou nevýhodou UID je možnosť skončenia UID Validity, čo by viedlo k nutnosti opätovného stiahnutia všetkých správ a potenciálnej desynchronizácii klienta so serverom. Message-ID je vždy jedinečný pre každý email odoslaný daným serverom, takže v kombinácii s emailom odosielateľa predstavuje spoľahlivejší spôsob unikátneho pomenovania.

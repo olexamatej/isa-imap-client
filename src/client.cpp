@@ -1,4 +1,10 @@
 // Author: Matej Olexa (xolexa03)
+// this file was inspired by
+//   OpenSSL - Cryptography Basics (https://opensource.com/article/19/6/cryptography-basics-openssl-part-1)
+//   OpenSSL Manual (https://docs.openssl.org/master/man3/)
+//   OpenSSL Tutorial by IBM (https://developer.ibm.com/tutorials/l-openssl/)
+//   Socket Programming in C++ (https://www.geeksforgeeks.org/socket-programming-in-cpp/)
+
 
 #include "client.h"
 
