@@ -12,23 +12,23 @@ make /imapcl imap.centrum.sk -p 993 -T -a auth_file -o saved_emails
 
 List of submitted files:
 
-Makefile 
-README 
-documentation.pdf 
-mockup.py 
-src/ 
-arg_parser.cpp 
-arg_parser.h 
-client.cpp
-client.h 
-commands.cpp 
-commands.h 
-connection.cpp 
-connection.h 
-file_manager.cpp 
-file_manager.h 
-main.cpp 
-msg_parser.cpp 
-msg_parser.h 
-runner.cpp 
-runner.h
+Makefile  
+README  
+documentation.pdf  
+mockup.py  
+src/  
+arg_parser.cpp  
+arg_parser.h  
+client.cpp 
+client.h  
+commands.cpp  
+commands.h  
+connection.cpp   
+connection.h  
+file_manager.cpp  
+file_manager.h  
+main.cpp  
+msg_parser.cpp  
+msg_parser.h  
+runner.cpp  
+runner.h 
