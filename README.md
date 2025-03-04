@@ -1,36 +1,34 @@
+Author - Matej Olexa, xolexa03 Date - 16.11.2024
 
+Implementation Description
 
-Autor - Matej Olexa, xolexa03
-Dátum - 16.11.2024
+The implementation of the IMAP client `imapcl` which, using the RFC3501 protocol, allows downloading messages stored on a server. After launching, the client authenticates, downloads the necessary messages to a selected directory using specified arguments, and then terminates the connection. The program is written in C++ and meets the assignment requirements without extending interactivity.
 
-Popis implementácie
+Example of usage (assuming the existence of the `saved_emails` directory and the `auth_file`):
 
-Implementácia IMAP klienta imapcl ktorý pomocou protokolu RFC3501 umožňuje sťahovanie správ uložených na serveri. Po spustení sa klient autentifikuje, pomocou vybraných argumentov stiahne potrebné správy do vybraného adresára a preruší spojenie. Program je písaný v programovacom jazyku C++ a splňuje požiadavky zadanie bez rozšírenia interaktivity.
+```
+make /imapcl imap.centrum.sk -p 993 -T -a auth_file -o saved_emails
+```
 
-Príklad spustenia (za predpokladu existencie priečinku saved_emails a súboru auth_file)
+List of submitted files:
 
-make
-/imapcl imap.centrum.sk -p 993 -T -a auth_file -o saved_emails
-
-Zoznam odovzdaných súborov
-
-Makefile
-README
-documentation.pdf
-mockup.py
-src/
-    arg_parser.cpp
-    arg_pasrer.h
-    client.cpp
-    client.h
-    commands.cpp
-    commands.h
-    connection.cpp
-    connection.h
-    file_manager.cpp
-    file_manager.h
-    main.cpp
-    msg_parser.cpp
-    msg_parser.h
-    runner.cpp
-    runner.h
+Makefile 
+README 
+documentation.pdf 
+mockup.py 
+src/ 
+arg_parser.cpp 
+arg_parser.h 
+client.cpp
+client.h 
+commands.cpp 
+commands.h 
+connection.cpp 
+connection.h 
+file_manager.cpp 
+file_manager.h 
+main.cpp 
+msg_parser.cpp 
+msg_parser.h 
+runner.cpp 
+runner.h
